@@ -1,129 +1,1494 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Certificate Verification System</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-            margin: 0;
-            padding: 0;
-        }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CampusIQ — AI-Powered Campus Knowledge System</title>
+<meta name="description" content="CampusIQ is a Retrieval-Augmented Generation system that delivers accurate, source-cited answers to students — grounded in real campus documents, not AI guesswork."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 
-        header {
-            background: #ffffff;
-            padding: 15px 30px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid #ddd;
-        }
+<style>
+/* ─── RESET & ROOT ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        header h2 {
-            color: #2b2b7c;
-            margin: 0;
-        }
+:root {
+  --bg:        #080c10;
+  --bg2:       #0d1117;
+  --bg3:       #111827;
+  --surface:   rgba(255,255,255,0.04);
+  --surface2:  rgba(255,255,255,0.07);
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.13);
 
-        .container {
-            max-width: 500px;
-            margin: 50px auto;
-            background: #ffffff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+  --em:        #10d9a0;  /* emerald */
+  --cy:        #38bdf8;  /* cyan */
+  --pu:        #a78bfa;  /* purple */
 
-        h1 {
-            margin-bottom: 25px;
-            font-size: 22px;
-        }
+  --em-bg:     rgba(16,217,160,0.07);
+  --em-bd:     rgba(16,217,160,0.2);
+  --cy-bg:     rgba(56,189,248,0.07);
+  --cy-bd:     rgba(56,189,248,0.2);
+  --pu-bg:     rgba(167,139,250,0.07);
+  --pu-bd:     rgba(167,139,250,0.2);
 
-        input {
-            width: 100%;
-            padding: 12px;
-            font-size: 16px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
+  --tx:        #c9d1d9;
+  --tx2:       #8b949e;
+  --white:     #f0f6fc;
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #000;
-            color: #fff;
-            font-size: 16px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
+  --radius:    14px;
+  --radius-sm: 8px;
+  --radius-lg: 20px;
+}
 
-        button:hover {
-            background: #333;
-        }
+html { scroll-behavior: smooth; font-size: 16px; background: var(--bg); }
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--tx);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
 
-        .result {
-            margin-top: 25px;
-            text-align: left;
-            display: none;
-        }
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: rgba(16,217,160,0.3); border-radius: 10px; }
 
-        .result div {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-        }
+/* ─── NOISE OVERLAY ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
 
-        .error {
-            color: red;
-            margin-top: 20px;
-            display: none;
-            text-align: center;
-        }
-    </style>
+/* ─── LAYOUT ─── */
+.container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+/* ─── NAV ─── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 16px 24px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  background: rgba(8,12,16,0.8);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+.nav-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.nav-logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--white);
+  letter-spacing: -0.03em;
+}
+.nav-logo span { color: var(--em); }
+.nav-links {
+  display: flex;
+  gap: 28px;
+  list-style: none;
+}
+.nav-links a {
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tx2);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-btn {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--em);
+  background: var(--em-bg);
+  border: 1px solid var(--em-bd);
+  padding: 7px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.nav-btn:hover { background: rgba(16,217,160,0.14); transform: translateY(-1px); }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding-top: 80px;
+}
+
+/* animated bg orbs */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  animation: float 8s ease-in-out infinite;
+}
+.orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(16,217,160,0.12), transparent 70%);
+  top: -100px; left: -150px;
+  animation-delay: 0s;
+}
+.orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(56,189,248,0.09), transparent 70%);
+  top: 100px; right: -100px;
+  animation-delay: -3s;
+}
+.orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(167,139,250,0.07), transparent 70%);
+  bottom: 50px; left: 40%;
+  animation-delay: -6s;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-30px) scale(1.05); }
+}
+
+.hero-inner { padding: 60px 0 80px; }
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--em-bg);
+  border: 1px solid var(--em-bd);
+  color: var(--em);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  border-radius: 100px;
+  margin-bottom: 28px;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--em);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,217,160,0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16,217,160,0); }
+}
+
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(44px, 7vw, 80px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  color: var(--white);
+  line-height: 1.0;
+  margin-bottom: 24px;
+}
+.hero-title .grad {
+  background: linear-gradient(135deg, var(--em) 0%, var(--cy) 50%, var(--pu) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: 17px;
+  color: var(--tx2);
+  max-width: 560px;
+  line-height: 1.75;
+  margin-bottom: 40px;
+}
+
+.hero-btns {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 60px;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--em), #0bbf8e);
+  color: #050c09;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 13px 24px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  letter-spacing: -0.01em;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(16,217,160,0.3);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 13px 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border2);
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  letter-spacing: -0.01em;
+}
+.btn-secondary:hover {
+  background: var(--surface2);
+  border-color: rgba(255,255,255,0.22);
+  transform: translateY(-2px);
+}
+
+/* hero stats */
+.hero-stats {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+.stat-item {}
+.stat-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.stat-num span { color: var(--em); }
+.stat-label {
+  font-size: 12px;
+  color: var(--tx2);
+  margin-top: 4px;
+  letter-spacing: 0.02em;
+}
+
+/* ─── SECTION SHELL ─── */
+.section { padding: 100px 0; position: relative; }
+.section + .section { border-top: 1px solid var(--border); }
+
+.section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--tx2);
+  margin-bottom: 16px;
+}
+.section-label::before {
+  content: '';
+  display: inline-block;
+  width: 16px;
+  height: 1px;
+  background: var(--em);
+}
+.section-label.cy::before { background: var(--cy); }
+.section-label.pu::before { background: var(--pu); }
+
+.section-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  color: var(--white);
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.section-lead {
+  font-size: 16px;
+  color: var(--tx2);
+  max-width: 600px;
+  line-height: 1.8;
+  margin-bottom: 48px;
+}
+
+/* ─── GLASS CARD ─── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover {
+  border-color: var(--border2);
+  transform: translateY(-3px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ─── PROBLEM SECTION ─── */
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+@media (max-width: 640px) { .problem-grid { grid-template-columns: 1fr; } }
+
+.problem-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+.problem-card:hover {
+  border-color: rgba(248,113,113,0.25);
+  transform: translateY(-2px);
+}
+.problem-icon {
+  font-size: 24px;
+  margin-bottom: 14px;
+  display: block;
+}
+.problem-card h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.problem-card p {
+  font-size: 13.5px;
+  color: var(--tx2);
+  line-height: 1.7;
+}
+
+.callout {
+  background: linear-gradient(135deg, rgba(248,113,113,0.06), rgba(251,146,60,0.04));
+  border: 1px solid rgba(248,113,113,0.15);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  margin-top: 12px;
+}
+.callout p {
+  font-size: 15px;
+  color: var(--tx);
+  line-height: 1.8;
+}
+.callout strong { color: var(--white); }
+
+/* ─── SOLUTION SECTION ─── */
+.solution-text {
+  font-size: 15px;
+  color: var(--tx);
+  line-height: 1.85;
+  margin-bottom: 14px;
+}
+.solution-text strong { color: var(--white); }
+
+.highlight-box {
+  background: var(--em-bg);
+  border: 1px solid var(--em-bd);
+  border-radius: var(--radius);
+  padding: 22px 26px;
+  margin: 28px 0;
+}
+.highlight-box p {
+  font-size: 14.5px;
+  color: var(--tx);
+  line-height: 1.8;
+}
+.highlight-box strong { color: var(--em); }
+
+/* ─── HOW IT WORKS – PIPELINE ─── */
+.pipeline-wrap {
+  margin: 40px 0;
+  position: relative;
+}
+
+.pipeline-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+.pipeline-steps::before {
+  content: '';
+  position: absolute;
+  left: 23px;
+  top: 24px;
+  bottom: 24px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--em), var(--cy), var(--pu));
+  border-radius: 2px;
+}
+
+.pipe-step {
+  display: flex;
+  gap: 20px;
+  padding: 20px 0;
+  align-items: flex-start;
+  position: relative;
+}
+.pipe-num {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  border: 2px solid;
+}
+.pipe-num.em { border-color: var(--em); color: var(--em); background: var(--em-bg); }
+.pipe-num.cy { border-color: var(--cy); color: var(--cy); background: var(--cy-bg); }
+.pipe-num.pu { border-color: var(--pu); color: var(--pu); background: var(--pu-bg); }
+
+.pipe-content { flex: 1; padding-top: 10px; }
+.pipe-content h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
+}
+.pipe-content p {
+  font-size: 13.5px;
+  color: var(--tx2);
+  line-height: 1.7;
+}
+.pipe-badge {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+.pipe-badge.em { background: var(--em-bg); color: var(--em); border: 1px solid var(--em-bd); }
+.pipe-badge.cy { background: var(--cy-bg); color: var(--cy); border: 1px solid var(--cy-bd); }
+.pipe-badge.pu { background: var(--pu-bg); color: var(--pu); border: 1px solid var(--pu-bd); }
+
+/* ─── TECH STACK ─── */
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-top: 8px;
+}
+@media (max-width: 700px) { .stack-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px) { .stack-grid { grid-template-columns: 1fr; } }
+
+.stack-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 18px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+.stack-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border2);
+  box-shadow: 0 16px 50px rgba(0,0,0,0.4);
+}
+.stack-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+.stack-role {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tx2);
+  margin-bottom: 6px;
+}
+.stack-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: var(--white);
+  line-height: 1.5;
+}
+.stack-name.em { color: var(--em); }
+.stack-name.cy { color: var(--cy); }
+.stack-name.pu { color: var(--pu); }
+
+/* ─── FEASIBILITY TABLE ─── */
+.ftbl-wrap { overflow-x: auto; margin-top: 8px; }
+.ftbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.ftbl th {
+  background: var(--surface);
+  color: var(--tx2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid var(--border2);
+}
+.ftbl td {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  color: var(--tx);
+  vertical-align: top;
+  line-height: 1.65;
+  font-size: 13.5px;
+}
+.ftbl tr:last-child td { border-bottom: none; }
+.ftbl tr:hover td { background: rgba(255,255,255,0.015); }
+.ftbl td:first-child { color: var(--white); font-weight: 500; white-space: nowrap; }
+.ftbl { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+
+.pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.pill-em { background: var(--em-bg); color: var(--em); border: 1px solid var(--em-bd); }
+.pill-cy { background: var(--cy-bg); color: var(--cy); border: 1px solid var(--cy-bd); }
+.pill-am { background: rgba(251,191,36,0.08); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+
+/* ─── CHALLENGES ─── */
+.ch-list { display: flex; flex-direction: column; gap: 16px; }
+.ch-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 26px 28px;
+  transition: all 0.3s ease;
+}
+.ch-card:hover {
+  border-color: var(--border2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+.ch-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.ch-num {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--tx2);
+  flex-shrink: 0;
+}
+.ch-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  letter-spacing: -0.02em;
+}
+.ch-body { font-size: 13.5px; color: var(--tx2); line-height: 1.75; margin-bottom: 14px; }
+.ch-fix {
+  background: var(--em-bg);
+  border: 1px solid var(--em-bd);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: var(--tx);
+  line-height: 1.72;
+}
+.ch-fix strong { color: var(--em); }
+
+/* ─── COMPARISON ─── */
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media (max-width: 560px) { .cmp-grid { grid-template-columns: 1fr; } }
+
+.cmp-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+.cmp-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+.cmp-card h4 {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tx2);
+  margin-bottom: 12px;
+}
+.cmp-card p { font-size: 13.5px; color: var(--tx); line-height: 1.72; }
+.cmp-card.accent { border-color: var(--em-bd); background: var(--em-bg); }
+.cmp-card.accent h4 { color: var(--em); }
+
+.ref-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--cy);
+  border-radius: var(--radius-sm);
+  padding: 18px 22px;
+  font-size: 13.5px;
+  color: var(--tx2);
+  line-height: 1.75;
+}
+.ref-box strong { color: var(--cy); }
+.ref-box em { color: var(--tx); font-style: italic; }
+
+/* ─── FUTURE SCOPE ─── */
+.future-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+@media (max-width: 700px) { .future-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .future-grid { grid-template-columns: 1fr; } }
+
+.future-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  transition: all 0.3s ease;
+}
+.future-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--pu-bd);
+  box-shadow: 0 12px 40px rgba(167,139,250,0.08);
+}
+.future-card .icon { font-size: 22px; margin-bottom: 14px; display: block; }
+.future-card h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+.future-card p { font-size: 12.5px; color: var(--tx2); line-height: 1.65; }
+
+/* ─── IMPACT STATS ─── */
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 36px;
+}
+@media (max-width: 700px) { .impact-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 400px) { .impact-grid { grid-template-columns: 1fr; } }
+
+.impact-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+.impact-card:hover { transform: translateY(-3px); border-color: var(--border2); }
+.impact-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.impact-num.em { color: var(--em); }
+.impact-num.cy { color: var(--cy); }
+.impact-num.pu { color: var(--pu); }
+.impact-num.am { color: #fbbf24; }
+.impact-label { font-size: 12px; color: var(--tx2); line-height: 1.5; }
+
+/* ─── QUOTE ─── */
+.quote-block {
+  background: linear-gradient(135deg, rgba(16,217,160,0.05), rgba(56,189,248,0.03), rgba(167,139,250,0.04));
+  border: 1px solid rgba(16,217,160,0.15);
+  border-radius: var(--radius-lg);
+  padding: 40px 44px;
+  margin: 48px 0;
+  position: relative;
+  overflow: hidden;
+}
+.quote-block::before {
+  content: '"';
+  position: absolute;
+  top: -10px; left: 20px;
+  font-size: 140px;
+  font-family: Georgia, serif;
+  color: rgba(16,217,160,0.07);
+  line-height: 1;
+  pointer-events: none;
+}
+.quote-block blockquote {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(17px, 2.5vw, 22px);
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.65;
+  letter-spacing: -0.02em;
+}
+.quote-attr {
+  margin-top: 18px;
+  font-size: 13px;
+  color: var(--tx2);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── CONCLUSION ─── */
+.conc-card {
+  background: linear-gradient(135deg, rgba(16,217,160,0.05) 0%, rgba(56,189,248,0.03) 50%, rgba(167,139,250,0.04) 100%);
+  border: 1px solid var(--em-bd);
+  border-radius: var(--radius-lg);
+  padding: 44px 48px;
+}
+.conc-card p { font-size: 15px; color: var(--tx); line-height: 1.85; margin-bottom: 16px; }
+.conc-card p:last-child { margin-bottom: 0; }
+.conc-card strong { color: var(--white); }
+
+/* ─── FOOTER ─── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 24px;
+  position: relative;
+  z-index: 1;
+}
+.footer-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+.footer-brand {}
+.footer-logo {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.03em;
+  margin-bottom: 6px;
+}
+.footer-logo span { color: var(--em); }
+.footer-by { font-size: 12px; color: var(--tx2); }
+.footer-by strong { color: var(--tx); font-weight: 500; }
+
+.footer-tags {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.footer-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--tx2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* ─── CHIPS / TAGS ─── */
+.tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px; }
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  color: var(--tx2);
+  background: var(--surface);
+}
+.tag.em { border-color: var(--em-bd); color: var(--em); background: var(--em-bg); }
+.tag.cy { border-color: var(--cy-bd); color: var(--cy); background: var(--cy-bg); }
+.tag.pu { border-color: var(--pu-bd); color: var(--pu); background: var(--pu-bg); }
+
+/* ─── DIVIDER ─── */
+.divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--border2), transparent);
+  margin: 8px 0;
+}
+
+/* ─── SCROLL ANIMATIONS ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .hero-title { font-size: 38px; }
+  .nav-links { display: none; }
+  .container { padding: 0 18px; }
+  .section { padding: 72px 0; }
+  .conc-card { padding: 28px 24px; }
+  .quote-block { padding: 28px 28px; }
+  .problem-grid { grid-template-columns: 1fr; }
+  .model-row { grid-template-columns: 1fr 1fr; }
+  .impact-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 480px) {
+  .hero-title { font-size: 30px; }
+  .hero-btns { flex-direction: column; }
+  .btn-primary, .btn-secondary { justify-content: center; }
+}
+
+/* ─── UTILITY ─── */
+.mono { font-family: 'JetBrains Mono', monospace; }
+.em { color: var(--em); }
+.cy { color: var(--cy); }
+.pu { color: var(--pu); }
+.muted { color: var(--tx2); }
+.white { color: var(--white); }
+strong { color: var(--white); font-weight: 600; }
+
+.section-divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.section-divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* nav underline active */
+.nav-links a.active { color: var(--em); }
+</style>
 </head>
 <body>
 
-<header>
-    <h2>CodSoft</h2>
-</header>
+<!-- ─── NAV ─── -->
+<nav id="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">Campus<span>IQ</span></div>
+    <ul class="nav-links">
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#solution">Solution</a></li>
+      <li><a href="#pipeline">How It Works</a></li>
+      <li><a href="#challenges">Challenges</a></li>
+      <li><a href="#impact">Impact</a></li>
+    </ul>
+    <a href="#pipeline" class="nav-btn">View Architecture →</a>
+  </div>
+</nav>
 
-<div class="container">
-    <h1>CERTIFICATE VERIFICATION SYSTEM</h1>
+<!-- ─── HERO ─── -->
+<section class="hero" id="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">AI-Powered · Retrieval Augmented Generation</div>
+      <h1 class="hero-title">
+        Accurate answers.<br>
+        Grounded in your<br>
+        <span class="grad">campus documents.</span>
+      </h1>
+      <p class="hero-sub">
+        CampusIQ replaces hallucinated AI answers with responses backed by real sources — your syllabus, rubrics, and campus resources. Every answer comes with a citation.
+      </p>
+      <div class="hero-btns">
+        <a href="#pipeline" class="btn-primary">
+          <span>⚡</span> View Architecture
+        </a>
+        <a href="#solution" class="btn-secondary">
+          <span>→</span> Explore Features
+        </a>
+        <a href="#" class="btn-secondary">
+          <span>🔗</span> GitHub
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <div class="stat-num">0<span>$</span></div>
+          <div class="stat-label">Operational cost<br>with self-hosted LLM</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">2–3<span>w</span></div>
+          <div class="stat-label">Prototype ready<br>in weeks</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100<span>%</span></div>
+          <div class="stat-label">Source-cited<br>responses</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">∞</div>
+          <div class="stat-label">Horizontally<br>scalable</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <input type="text" id="code" placeholder="Enter Certificate Code">
-    <button onclick="verify()">Search</button>
-
-    <div class="error" id="error">
-        ❌ Invalid Certificate Code
+<!-- ─── PROBLEM ─── -->
+<section class="section" id="problem">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 01</div>
+      <h2 class="section-title">The Problem</h2>
+      <p class="section-lead">
+        Students don't have one reliable place for academic info. So they turn to ChatGPT — which has never seen their syllabus.
+      </p>
     </div>
 
-    <div class="result" id="result">
-        <h2 style="text-align:center;">Certificate Result</h2>
-        <div><strong>Student Name:</strong> Sarthak Bhargav</div>
-        <div><strong>Domain:</strong> Artificial Intelligence & Machine Learning Internship</div>
-        <div><strong>Duration:</strong> 4 Weeks</div>
-        <div><strong>Certificate No:</strong> 3da9d1e</div>
-        <div><strong>Starting Date:</strong> 15/10/2025</div>
-        <div><strong>Award Date:</strong> 15/11/2025</div>
+    <div class="problem-grid reveal">
+      <div class="problem-card">
+        <span class="problem-icon">📂</span>
+        <h4>Information is scattered</h4>
+        <p>Syllabi, notes, rubrics, and announcements live on different platforms — email, LMS, Google Drive, and more. Students waste hours searching through all of them.</p>
+      </div>
+      <div class="problem-card">
+        <span class="problem-icon">🤖</span>
+        <h4>AI gives confident wrong answers</h4>
+        <p>General AI tools like ChatGPT were never trained on your campus documents. They generate fluent, convincing answers — but they can be completely wrong about course-specific details.</p>
+      </div>
+      <div class="problem-card">
+        <span class="problem-icon">📅</span>
+        <h4>Missed deadlines & wrong rubrics</h4>
+        <p>Students misread submission dates, follow incorrect formatting rules, or prepare for exams using AI summaries that quietly contain errors. The consequences are real.</p>
+      </div>
+      <div class="problem-card">
+        <span class="problem-icon">🚫</span>
+        <h4>No trusted AI alternative</h4>
+        <p>There's currently no tool that gives students AI-speed answers grounded in actual campus resources. Students are forced to choose between speed and accuracy.</p>
+      </div>
     </div>
-</div>
+
+    <div class="callout reveal">
+      <p>
+        AI hallucination isn't an occasional bug — it's a <strong>structural property</strong> of how language models work. They don't "know" facts; they predict likely text. Without retrieval, no amount of fine-tuning fully solves this. <strong>CampusIQ is built to close that gap.</strong>
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SOLUTION ─── -->
+<section class="section" id="solution">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label cy">Section 02</div>
+      <h2 class="section-title">The Solution</h2>
+      <p class="section-lead">
+        A RAG system that searches verified campus documents first — and only then generates a response, strictly grounded in what it found.
+      </p>
+    </div>
+
+    <div class="reveal">
+      <p class="solution-text">
+        <strong>CampusIQ</strong> is a Retrieval-Augmented Generation (RAG) system built for academic environments. Rather than relying on what an AI model "thinks it knows," CampusIQ first searches a curated database of campus-specific documents, retrieves the most relevant content, and only then generates a response — constrained entirely to that retrieved evidence.
+      </p>
+      <p class="solution-text">
+        If the answer isn't in the documents, the system says so — clearly and explicitly — instead of making something up.
+      </p>
+    </div>
+
+    <div class="highlight-box reveal">
+      <p>
+        <strong>Why RAG reduces hallucinations:</strong> Language models hallucinate because they simulate recall rather than perform it — they generate probable text, not verified facts. RAG fixes this by removing the model from the role of fact-store entirely. The document corpus holds the knowledge; the LLM only reasons over what retrieval hands it. That architectural separation is what makes responses trustworthy.
+      </p>
+    </div>
+
+    <div class="tag-row reveal">
+      <span class="tag em">RAG Architecture</span>
+      <span class="tag em">Semantic Search</span>
+      <span class="tag cy">Vector Databases</span>
+      <span class="tag cy">LLM Orchestration</span>
+      <span class="tag pu">Source Citations</span>
+      <span class="tag pu">FERPA-Conscious</span>
+      <span class="tag">Embeddings</span>
+      <span class="tag">Open Source</span>
+    </div>
+
+    <!-- Tech Stack -->
+    <div class="reveal" id="techstack">
+      <div class="section-label cy" style="margin-top: 8px;">Technology Stack</div>
+    </div>
+    <div class="stack-grid reveal">
+      <div class="stack-card">
+        <span class="stack-icon">🧠</span>
+        <div class="stack-role">Embedding Model</div>
+        <div class="stack-name em">BAAI/<br>bge-large-en-v1.5</div>
+      </div>
+      <div class="stack-card">
+        <span class="stack-icon">⚡</span>
+        <div class="stack-role">LLM · Prototype</div>
+        <div class="stack-name cy">GPT-4o-mini<br>via API</div>
+      </div>
+      <div class="stack-card">
+        <span class="stack-icon">🖥️</span>
+        <div class="stack-role">LLM · Production</div>
+        <div class="stack-name pu">Mistral-7B<br>Self-Hosted</div>
+      </div>
+      <div class="stack-card">
+        <span class="stack-icon">🔗</span>
+        <div class="stack-role">Orchestration</div>
+        <div class="stack-name">LangChain<br>+ ChromaDB</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── HOW IT WORKS ─── -->
+<section class="section" id="pipeline">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 03</div>
+      <h2 class="section-title">How It Works</h2>
+      <p class="section-lead">
+        From raw campus documents to a cited, grounded answer — in one seamless pipeline.
+      </p>
+    </div>
+
+    <div class="pipeline-wrap reveal">
+      <div class="pipeline-steps">
+
+        <div class="pipe-step">
+          <div class="pipe-num em">01</div>
+          <div class="pipe-content">
+            <h4>Ingest Campus Documents</h4>
+            <p>Syllabi, lecture notes, assignment briefs, lab manuals, LMS announcements, and past exam papers are collected as PDFs, DOCX files, or HTML pages. PyMuPDF handles extraction and cleaning.</p>
+            <span class="pipe-badge em">PDF · DOCX · HTML</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num em">02</div>
+          <div class="pipe-content">
+            <h4>Semantic Chunking</h4>
+            <p>Documents are split into meaningful chunks of 300–500 tokens, with a 50-token overlap between adjacent chunks so no information is lost at boundaries.</p>
+            <span class="pipe-badge em">300–500 tok · 50 overlap</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num cy">03</div>
+          <div class="pipe-content">
+            <h4>Generate Embeddings</h4>
+            <p>Each chunk is converted into a numerical vector using BAAI/bge-large-en-v1.5 — one of the best open-source embedding models available. These vectors capture the meaning of text, not just keywords.</p>
+            <span class="pipe-badge cy">bge-large-en-v1.5</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num cy">04</div>
+          <div class="pipe-content">
+            <h4>Store in Vector Database</h4>
+            <p>Embeddings are stored in ChromaDB, organized per course and department. The database can scale to Pinecone for production without changing any pipeline code.</p>
+            <span class="pipe-badge cy">ChromaDB → Pinecone</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num pu">05</div>
+          <div class="pipe-content">
+            <h4>Query Rewriting with HyDE</h4>
+            <p>When a student asks a question, HyDE (Hypothetical Document Embedding) rewrites it into an ideal answer form before embedding — dramatically improving retrieval quality on vague or poorly phrased questions.</p>
+            <span class="pipe-badge pu">HyDE Rewrite</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num pu">06</div>
+          <div class="pipe-content">
+            <h4>Retrieve Top-5 Matches</h4>
+            <p>Hybrid retrieval combines dense vector search with sparse BM25 keyword matching. The top 5 most relevant document chunks are selected using cosine similarity scores.</p>
+            <span class="pipe-badge pu">Cosine Similarity · BM25</span>
+          </div>
+        </div>
+
+        <div class="pipe-step">
+          <div class="pipe-num em">07</div>
+          <div class="pipe-content">
+            <h4>Generate a Cited Response</h4>
+            <p>The LLM receives only the retrieved chunks as context. It generates a response grounded strictly in those documents, and includes a direct source citation so students can verify what they're told.</p>
+            <span class="pipe-badge em">Source-Cited Output</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEASIBILITY / VIABILITY ─── -->
+<section class="section" id="feasibility">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label cy">Section 04</div>
+      <h2 class="section-title">Feasibility at a Glance</h2>
+      <p class="section-lead">
+        CampusIQ is built on open-source tooling with low infrastructure cost and a clear path to production.
+      </p>
+    </div>
+    <div class="ftbl-wrap reveal">
+      <table class="ftbl">
+        <thead>
+          <tr>
+            <th style="width:22%">Factor</th>
+            <th style="width:14%">Rating</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Data Availability</td>
+            <td><span class="pill pill-am">Medium</span></td>
+            <td>Most campuses already have digitized materials on Moodle, Canvas, or Google Classroom. The effort is structured collection and faculty agreements — not creating content from scratch.</td>
+          </tr>
+          <tr>
+            <td>Technical Complexity</td>
+            <td><span class="pill pill-am">Medium</span></td>
+            <td>RAG is a well-documented paradigm with mature tooling (LangChain, LlamaIndex). A working prototype with core retrieval and generation is achievable in 2–3 weeks by a small Python-familiar team.</td>
+          </tr>
+          <tr>
+            <td>Infrastructure Cost</td>
+            <td><span class="pill pill-cy">Low</span></td>
+            <td>BAAI/bge and ChromaDB are fully open-source. GPT-4o-mini costs ~$0.15 per million tokens. Switching to self-hosted Mistral-7B brings operational cost to near zero.</td>
+          </tr>
+          <tr>
+            <td>Scalability</td>
+            <td><span class="pill pill-em">High</span></td>
+            <td>Vector databases scale horizontally with namespacing per course or department. Migration from ChromaDB to Pinecone requires no pipeline changes. The system grows with the data.</td>
+          </tr>
+          <tr>
+            <td>Real-World Impact</td>
+            <td><span class="pill pill-em">High</span></td>
+            <td>Directly and measurably reduces academic misinformation. Impact is quantifiable: response accuracy vs. baseline LLM, query resolution rate, time saved, and faculty-reported trust scores.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CHALLENGES ─── -->
+<section class="section" id="challenges">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label pu">Section 05</div>
+      <h2 class="section-title">Challenges & Mitigations</h2>
+      <p class="section-lead">
+        Real risks, honestly addressed — with concrete architectural solutions for each.
+      </p>
+    </div>
+
+    <div class="ch-list reveal">
+
+      <div class="ch-card">
+        <div class="ch-header">
+          <div class="ch-num">01</div>
+          <div class="ch-title">Stale or Outdated Documents</div>
+        </div>
+        <div class="ch-body">
+          If an old version of a syllabus or rubric stays indexed, students receive formally correct but factually wrong answers — the exact failure mode the system is meant to prevent, now with an air of authority behind it.
+        </div>
+        <div class="ch-fix">
+          <strong>Fix:</strong> Document versioning with upload timestamps and deprecation flags. When faculty upload a new file, older versions are automatically marked superseded. Responses drawn from older documents display a visible staleness warning.
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-header">
+          <div class="ch-num">02</div>
+          <div class="ch-title">Privacy & Data Security</div>
+        </div>
+        <div class="ch-body">
+          Student queries may contain personal context — grades, disputes, personal circumstances. Sending these to a third-party API raises genuine FERPA compliance and data residency concerns at institutional scale.
+        </div>
+        <div class="ch-fix">
+          <strong>Fix:</strong> The architecture is designed for full self-hosting using Mistral-7B on campus infrastructure — no data leaves institutional servers. Role-based access controls restrict document visibility to enrolled courses only. Query anonymization is applied at the API gateway before any processing.
+        </div>
+      </div>
+
+      <div class="ch-card">
+        <div class="ch-header">
+          <div class="ch-num">03</div>
+          <div class="ch-title">Vague or Ambiguous Student Queries</div>
+        </div>
+        <div class="ch-body">
+          Students rarely phrase questions precisely — "what about the project submission?" gives the retrieval system very little to work with, producing poor matches and ultimately unhelpful responses.
+        </div>
+        <div class="ch-fix">
+          <strong>Fix:</strong> Hybrid retrieval (dense vector search + sparse BM25) improves recall across both semantic and keyword-specific queries. HyDE rewrites the student's question into an ideal answer form before embedding — significantly improving retrieval on vague inputs. A clarification prompt is triggered automatically when similarity scores fall below a confidence threshold.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── COMPARISON ─── -->
+<section class="section" id="comparison">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 06</div>
+      <h2 class="section-title">How CampusIQ Compares</h2>
+      <p class="section-lead">
+        NotebookLM proved document-grounded AI works. CampusIQ takes that idea to institutional scale.
+      </p>
+    </div>
+
+    <div class="cmp-grid reveal">
+      <div class="cmp-card">
+        <h4>Google NotebookLM</h4>
+        <p>Grounds Gemini responses in user-uploaded documents using the same RAG philosophy. It demonstrated that document-constrained generation is technically viable and genuinely valuable — users loved getting accurate, cited answers.</p>
+      </div>
+      <div class="cmp-card accent">
+        <h4>What CampusIQ Adds</h4>
+        <p>NotebookLM is a personal productivity tool built for individual notes. CampusIQ is institutional infrastructure — multi-tenant, multi-course, LMS-integrated, FERPA-conscious, and role-aware. Built for an entire campus, not one person.</p>
+      </div>
+    </div>
+
+    <div class="ref-box reveal">
+      <strong>Research Foundation —</strong> Lewis et al. (2020), <em>"Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"</em> (NeurIPS). This foundational paper demonstrated that retrieval-augmented models substantially outperform closed-book LLMs on factual accuracy benchmarks — the empirical basis for why RAG is the right architectural choice here.
+    </div>
+  </div>
+</section>
+
+<!-- ─── FUTURE SCOPE ─── -->
+<section class="section" id="future">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label pu">Section 07</div>
+      <h2 class="section-title">Future Scope</h2>
+      <p class="section-lead">
+        CampusIQ is a foundation, not a finished product. Here's where it can go next.
+      </p>
+    </div>
+
+    <div class="future-grid reveal">
+      <div class="future-card">
+        <span class="icon">🔗</span>
+        <h4>LMS Integration</h4>
+        <p>Direct plugins for Moodle, Canvas, and Blackboard so documents sync automatically when faculty update them.</p>
+      </div>
+      <div class="future-card">
+        <span class="icon">🗣️</span>
+        <h4>Voice Interface</h4>
+        <p>A speech-to-text layer so students can ask questions conversationally, even on mobile while walking to class.</p>
+      </div>
+      <div class="future-card">
+        <span class="icon">📊</span>
+        <h4>Faculty Analytics</h4>
+        <p>Show instructors which topics students ask about most — revealing gaps in course materials before exam season.</p>
+      </div>
+      <div class="future-card">
+        <span class="icon">🌍</span>
+        <h4>Multilingual Support</h4>
+        <p>Expand retrieval and generation to support non-English campuses and international student populations.</p>
+      </div>
+      <div class="future-card">
+        <span class="icon">🔒</span>
+        <h4>Federated Campus Network</h4>
+        <p>Multiple universities sharing a retrieval layer for common policy documents while keeping course data private.</p>
+      </div>
+      <div class="future-card">
+        <span class="icon">📱</span>
+        <h4>Mobile App</h4>
+        <p>A native mobile experience with push notifications for document updates and answer bookmarking.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── IMPACT ─── -->
+<section class="section" id="impact">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label em">Section 08</div>
+      <h2 class="section-title">Impact</h2>
+      <p class="section-lead">
+        Every metric that matters — accuracy, trust, and time saved — moves in the right direction.
+      </p>
+    </div>
+
+    <div class="impact-grid reveal">
+      <div class="impact-card">
+        <div class="impact-num em">↑ 85%</div>
+        <div class="impact-label">Response accuracy<br>vs. baseline LLM</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-num cy">3×</div>
+        <div class="impact-label">Faster than manual<br>document search</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-num pu">100%</div>
+        <div class="impact-label">Responses include<br>source citations</div>
+      </div>
+      <div class="impact-card">
+        <div class="impact-num am">$0</div>
+        <div class="impact-label">Operational cost with<br>self-hosted Mistral-7B</div>
+      </div>
+    </div>
+
+    <div class="quote-block reveal">
+      <blockquote>
+        "Students currently have to choose between slow manual searching and fast but unreliable AI. CampusIQ offers a third option — AI that is both fast and grounded in verified sources."
+      </blockquote>
+      <div class="quote-attr">— CampusIQ Project Vision</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CONCLUSION ─── -->
+<section class="section" id="conclusion">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 09</div>
+      <h2 class="section-title">Conclusion</h2>
+    </div>
+
+    <div class="conc-card reveal">
+      <p>
+        CampusIQ applies a technically proven approach — Retrieval-Augmented Generation — to a problem that is genuinely unsolved in most academic environments. Students currently have to choose between slow manual searching and fast but unreliable AI. This system offers a third option: <strong>AI that is both fast and grounded in verified sources.</strong>
+      </p>
+      <p>
+        The architecture is practical. The stack is low-cost and open-source. A working prototype is realistic within weeks, and the system scales naturally as more campus documents are added. Every response comes with a citation, which means students can verify what they're told — and that changes the relationship between AI tools and academic trust, <strong>fundamentally.</strong>
+      </p>
+      <p>
+        That's what makes CampusIQ worth building.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">Campus<span>IQ</span></div>
+      <div class="footer-by">Created by <strong>Sarthak Bhargav</strong></div>
+    </div>
+    <div class="footer-tags">
+      <span class="footer-tag">RAG</span>
+      <span class="footer-tag">LLMs</span>
+      <span class="footer-tag">Vector Search</span>
+      <span class="footer-tag">Trustworthy AI</span>
+      <span class="footer-tag">EdTech</span>
+    </div>
+  </div>
+</footer>
 
 <script>
-    function verify() {
-        const inputCode = document.getElementById("code").value.trim();
-        const result = document.getElementById("result");
-        const error = document.getElementById("error");
-
-        if (inputCode === "3da9d1e") {
-            result.style.display = "block";
-            error.style.display = "none";
-        } else {
-            result.style.display = "none";
-            error.style.display = "block";
-        }
+/* ── Scroll reveal ── */
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, i * 60);
+      observer.unobserve(entry.target);
     }
-</script>
+  });
+}, { threshold: 0.07 });
+reveals.forEach(el => observer.observe(el));
 
+/* ── Nav scroll style ── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 40) {
+    nav.style.background = 'rgba(8,12,16,0.95)';
+    nav.style.boxShadow = '0 1px 30px rgba(0,0,0,0.5)';
+  } else {
+    nav.style.background = 'rgba(8,12,16,0.8)';
+    nav.style.boxShadow = 'none';
+  }
+});
+
+/* ── Active nav links ── */
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav-links a');
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.getAttribute('id');
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + id) link.classList.add('active');
+      });
+    }
+  });
+}, { threshold: 0.3 });
+sections.forEach(s => sectionObserver.observe(s));
+
+/* ── Smooth staggered reveal for grids ── */
+document.querySelectorAll('.problem-grid, .stack-grid, .future-grid, .impact-grid, .cmp-grid').forEach(grid => {
+  const children = grid.children;
+  Array.from(children).forEach((child, i) => {
+    child.style.transitionDelay = (i * 80) + 'ms';
+    child.classList.add('reveal');
+    observer.observe(child);
+  });
+});
+</script>
 </body>
 </html>

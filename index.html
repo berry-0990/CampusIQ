@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate Verification System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: #ffffff;
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        header h2 {
+            color: #2b2b7c;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 25px;
+            font-size: 22px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #000;
+            color: #fff;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #333;
+        }
+
+        .result {
+            margin-top: 25px;
+            text-align: left;
+            display: none;
+        }
+
+        .result div {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .error {
+            color: red;
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h2>CodSoft</h2>
+</header>
+
+<div class="container">
+    <h1>CERTIFICATE VERIFICATION SYSTEM</h1>
+
+    <input type="text" id="code" placeholder="Enter Certificate Code">
+    <button onclick="verify()">Search</button>
+
+    <div class="error" id="error">
+        ❌ Invalid Certificate Code
+    </div>
+
+    <div class="result" id="result">
+        <h2 style="text-align:center;">Certificate Result</h2>
+        <div><strong>Student Name:</strong> Sarthak Bhargav</div>
+        <div><strong>Domain:</strong> Artificial Intelligence & Machine Learning Internship</div>
+        <div><strong>Duration:</strong> 4 Weeks</div>
+        <div><strong>Certificate No:</strong> 3da9d1e</div>
+        <div><strong>Starting Date:</strong> 15/10/2025</div>
+        <div><strong>Award Date:</strong> 15/11/2025</div>
+    </div>
+</div>
+
+<script>
+    function verify() {
+        const inputCode = document.getElementById("code").value.trim();
+        const result = document.getElementById("result");
+        const error = document.getElementById("error");
+
+        if (inputCode === "3da9d1e") {
+            result.style.display = "block";
+            error.style.display = "none";
+        } else {
+            result.style.display = "none";
+            error.style.display = "block";
+        }
+    }
+</script>
+
+</body>
+</html>

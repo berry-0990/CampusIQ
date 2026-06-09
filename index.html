@@ -6,44 +6,45 @@
 <title>CampusIQ — AI-Powered Campus Knowledge System</title>
 <meta name="description" content="CampusIQ is a Retrieval-Augmented Generation system that delivers accurate, source-cited answers to students — grounded in real campus documents, not AI guesswork."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
 
 <style>
 /* ─── RESET & ROOT ─── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg:        #080c10;
-  --bg2:       #0d1117;
-  --bg3:       #111827;
+  --bg:        #07090e;
+  --bg2:       #0b0f18;
+  --bg3:       #0f1420;
   --surface:   rgba(255,255,255,0.04);
   --surface2:  rgba(255,255,255,0.07);
-  --border:    rgba(255,255,255,0.08);
-  --border2:   rgba(255,255,255,0.13);
+  --border:    rgba(255,255,255,0.07);
+  --border2:   rgba(255,255,255,0.12);
 
-  --em:        #10d9a0;  /* emerald */
-  --cy:        #38bdf8;  /* cyan */
-  --pu:        #a78bfa;  /* purple */
+  --am:        #f0a020;   /* amber — primary */
+  --am2:       #fbbf24;   /* amber light */
+  --cy:        #22d3ee;   /* cyan — secondary */
+  --pu:        #c4b5fd;   /* violet — tertiary */
 
-  --em-bg:     rgba(16,217,160,0.07);
-  --em-bd:     rgba(16,217,160,0.2);
-  --cy-bg:     rgba(56,189,248,0.07);
-  --cy-bd:     rgba(56,189,248,0.2);
-  --pu-bg:     rgba(167,139,250,0.07);
-  --pu-bd:     rgba(167,139,250,0.2);
+  --am-bg:     rgba(240,160,32,0.07);
+  --am-bd:     rgba(240,160,32,0.22);
+  --cy-bg:     rgba(34,211,238,0.06);
+  --cy-bd:     rgba(34,211,238,0.2);
+  --pu-bg:     rgba(196,181,253,0.06);
+  --pu-bd:     rgba(196,181,253,0.18);
 
-  --tx:        #c9d1d9;
-  --tx2:       #8b949e;
-  --white:     #f0f6fc;
+  --tx:        #c5ccd8;
+  --tx2:       #7a8499;
+  --white:     #eef1f7;
 
   --radius:    14px;
   --radius-sm: 8px;
-  --radius-lg: 20px;
+  --radius-lg: 22px;
 }
 
 html { scroll-behavior: smooth; font-size: 16px; background: var(--bg); }
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   background: var(--bg);
   color: var(--tx);
   line-height: 1.75;
@@ -52,78 +53,92 @@ body {
 }
 
 /* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: rgba(16,217,160,0.3); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(240,160,32,0.3); border-radius: 10px; }
 
 /* ─── NOISE OVERLAY ─── */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
   pointer-events: none;
   z-index: 0;
-  opacity: 0.5;
+}
+
+/* ─── CURSOR SPOTLIGHT ─── */
+#spotlight {
+  position: fixed;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(240,160,32,0.055) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.4s ease;
+  opacity: 0;
 }
 
 /* ─── LAYOUT ─── */
-.container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+.container { max-width: 920px; margin: 0 auto; padding: 0 26px; position: relative; z-index: 1; }
 
 /* ─── NAV ─── */
 nav {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 100;
-  padding: 16px 24px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background: rgba(8,12,16,0.8);
+  padding: 15px 26px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  background: rgba(7,9,14,0.85);
   border-bottom: 1px solid var(--border);
   transition: all 0.3s ease;
 }
 .nav-inner {
-  max-width: 900px;
+  max-width: 920px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 .nav-logo {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 18px;
+  font-family: 'Playfair Display', serif;
+  font-weight: 800;
+  font-size: 19px;
   color: var(--white);
-  letter-spacing: -0.03em;
+  letter-spacing: -0.01em;
 }
-.nav-logo span { color: var(--em); }
+.nav-logo span { color: var(--am); }
 .nav-links {
   display: flex;
-  gap: 28px;
+  gap: 26px;
   list-style: none;
 }
 .nav-links a {
   text-decoration: none;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--tx2);
   transition: color 0.2s;
+  letter-spacing: 0.01em;
 }
-.nav-links a:hover { color: var(--white); }
+.nav-links a:hover, .nav-links a.active { color: var(--white); }
+.nav-links a.active { color: var(--am); }
 .nav-btn {
-  font-family: 'Inter', sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--em);
-  background: var(--em-bg);
-  border: 1px solid var(--em-bd);
-  padding: 7px 16px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--am);
+  background: var(--am-bg);
+  border: 1px solid var(--am-bd);
+  padding: 7px 15px;
   border-radius: 6px;
   cursor: pointer;
   text-decoration: none;
   transition: all 0.2s;
+  letter-spacing: 0.02em;
 }
-.nav-btn:hover { background: rgba(16,217,160,0.14); transform: translateY(-1px); }
+.nav-btn:hover { background: rgba(240,160,32,0.13); transform: translateY(-1px); }
 
 /* ─── HERO ─── */
 .hero {
@@ -134,107 +149,112 @@ nav {
   overflow: hidden;
   padding-top: 80px;
 }
-
-/* animated bg orbs */
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(120px);
+  filter: blur(110px);
   pointer-events: none;
-  animation: float 8s ease-in-out infinite;
+  animation: floatOrb 9s ease-in-out infinite;
 }
 .orb-1 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(16,217,160,0.12), transparent 70%);
-  top: -100px; left: -150px;
-  animation-delay: 0s;
+  width: 550px; height: 550px;
+  background: radial-gradient(circle, rgba(240,160,32,0.10), transparent 70%);
+  top: -140px; left: -180px;
 }
 .orb-2 {
   width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(56,189,248,0.09), transparent 70%);
-  top: 100px; right: -100px;
+  background: radial-gradient(circle, rgba(34,211,238,0.07), transparent 70%);
+  top: 120px; right: -120px;
   animation-delay: -3s;
 }
 .orb-3 {
   width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(167,139,250,0.07), transparent 70%);
-  bottom: 50px; left: 40%;
+  background: radial-gradient(circle, rgba(196,181,253,0.06), transparent 70%);
+  bottom: 60px; left: 38%;
   animation-delay: -6s;
 }
-@keyframes float {
+@keyframes floatOrb {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-30px) scale(1.05); }
+  50% { transform: translateY(-28px) scale(1.04); }
 }
 
-.hero-inner { padding: 60px 0 80px; }
+.hero-inner { padding: 56px 0 80px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+@media (max-width: 820px) { .hero-inner { grid-template-columns: 1fr; gap: 44px; } }
+
+.hero-left {}
 
 .hero-eyebrow {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--em-bg);
-  border: 1px solid var(--em-bd);
-  color: var(--em);
+  background: var(--am-bg);
+  border: 1px solid var(--am-bd);
+  color: var(--am);
   font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  letter-spacing: 0.12em;
+  font-size: 10px;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
-  padding: 6px 14px;
+  padding: 5px 13px;
   border-radius: 100px;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
-.hero-eyebrow::before {
-  content: '';
-  width: 6px; height: 6px;
+.hero-eyebrow .dot {
+  width: 5px; height: 5px;
   border-radius: 50%;
-  background: var(--em);
-  animation: pulse 2s infinite;
+  background: var(--am);
+  animation: pulseDot 2s infinite;
 }
-@keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,217,160,0.4); }
-  50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(16,217,160,0); }
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(240,160,32,0.5); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 5px rgba(240,160,32,0); }
 }
 
 .hero-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(44px, 7vw, 80px);
-  font-weight: 700;
-  letter-spacing: -0.04em;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(40px, 5vw, 62px);
+  font-weight: 800;
   color: var(--white);
-  line-height: 1.0;
-  margin-bottom: 24px;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 22px;
 }
-.hero-title .grad {
-  background: linear-gradient(135deg, var(--em) 0%, var(--cy) 50%, var(--pu) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.hero-title em {
+  font-style: italic;
+  color: var(--am);
+}
+.hero-title .line-small {
+  font-size: clamp(18px, 2.2vw, 26px);
+  font-weight: 700;
+  color: var(--tx2);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.01em;
+  display: block;
+  margin-bottom: 8px;
 }
 
 .hero-sub {
-  font-size: 17px;
+  font-size: 15.5px;
   color: var(--tx2);
-  max-width: 560px;
-  line-height: 1.75;
-  margin-bottom: 40px;
+  max-width: 480px;
+  line-height: 1.8;
+  margin-bottom: 36px;
 }
 
 .hero-btns {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-bottom: 60px;
+  margin-bottom: 52px;
 }
-
 .btn-primary {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: linear-gradient(135deg, var(--em), #0bbf8e);
-  color: #050c09;
-  font-size: 14px;
+  gap: 7px;
+  background: linear-gradient(135deg, var(--am), #d4880a);
+  color: #08060a;
+  font-size: 13.5px;
   font-weight: 700;
-  padding: 13px 24px;
+  padding: 12px 22px;
   border-radius: var(--radius-sm);
   border: none;
   cursor: pointer;
@@ -244,127 +264,255 @@ nav {
 }
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(16,217,160,0.3);
+  box-shadow: 0 12px 40px rgba(240,160,32,0.32);
 }
-
 .btn-secondary {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   background: var(--surface);
   color: var(--white);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 600;
-  padding: 13px 24px;
+  padding: 12px 22px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border2);
   cursor: pointer;
   text-decoration: none;
   transition: all 0.25s ease;
-  letter-spacing: -0.01em;
 }
 .btn-secondary:hover {
   background: var(--surface2);
-  border-color: rgba(255,255,255,0.22);
+  border-color: rgba(255,255,255,0.2);
   transform: translateY(-2px);
 }
 
-/* hero stats */
 .hero-stats {
   display: flex;
-  gap: 40px;
+  gap: 32px;
   flex-wrap: wrap;
 }
 .stat-item {}
 .stat-num {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 28px;
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
   font-weight: 700;
   color: var(--white);
-  letter-spacing: -0.04em;
   line-height: 1;
 }
-.stat-num span { color: var(--em); }
+.stat-num .accent { color: var(--am); }
 .stat-label {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--tx2);
   margin-top: 4px;
   letter-spacing: 0.02em;
+  line-height: 1.4;
 }
 
+/* ─── HERO DEMO TERMINAL ─── */
+.hero-right {}
+
+.demo-terminal {
+  background: #0a0e18;
+  border: 1px solid rgba(240,160,32,0.18);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+}
+.demo-titlebar {
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.demo-dot { width: 10px; height: 10px; border-radius: 50%; }
+.demo-dot-r { background: #ff5f57; }
+.demo-dot-y { background: #ffbd2e; }
+.demo-dot-g { background: #28ca41; }
+.demo-title-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--tx2);
+  margin-left: 6px;
+  letter-spacing: 0.06em;
+}
+
+.demo-body { padding: 20px; }
+
+.demo-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.demo-q-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 14px;
+  font-size: 12px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: var(--tx2);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.demo-q-btn:hover { border-color: var(--am-bd); color: var(--tx); background: var(--am-bg); }
+.demo-q-btn.active { border-color: var(--am-bd); color: var(--am); background: var(--am-bg); }
+.demo-q-icon { font-size: 13px; flex-shrink: 0; }
+
+.demo-pipeline {
+  margin: 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.demo-pipe-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  opacity: 0.3;
+  transition: all 0.3s ease;
+}
+.demo-pipe-step.done { opacity: 1; background: rgba(255,255,255,0.02); }
+.demo-pipe-step.active { opacity: 1; background: var(--am-bg); }
+.demo-pipe-icon {
+  width: 24px; height: 24px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+  background: var(--surface2);
+}
+.demo-pipe-step.done .demo-pipe-icon { background: rgba(240,160,32,0.12); }
+.demo-pipe-step.active .demo-pipe-icon { background: var(--am-bg); }
+.demo-pipe-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  color: var(--tx2);
+}
+.demo-pipe-step.done .demo-pipe-label { color: var(--tx); }
+.demo-pipe-step.active .demo-pipe-label { color: var(--am); }
+.demo-pipe-check {
+  margin-left: auto;
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.demo-pipe-step.done .demo-pipe-check { opacity: 1; color: var(--am); }
+.demo-pipe-step.active .demo-pipe-check { opacity: 1; color: var(--am); }
+
+.demo-answer {
+  background: rgba(240,160,32,0.05);
+  border: 1px solid rgba(240,160,32,0.15);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-top: 14px;
+  min-height: 80px;
+  display: none;
+}
+.demo-answer.visible { display: block; }
+.demo-answer-text {
+  font-size: 12.5px;
+  color: var(--tx);
+  line-height: 1.7;
+}
+.demo-answer-text strong { color: var(--white); }
+.demo-cite {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--am);
+}
+.demo-cite-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--am); }
+
+.demo-run-btn {
+  width: 100%;
+  background: linear-gradient(135deg, var(--am), #c8790a);
+  color: #08060a;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+}
+.demo-run-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(240,160,32,0.25); }
+.demo-run-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
 /* ─── SECTION SHELL ─── */
-.section { padding: 100px 0; position: relative; }
+.section { padding: 96px 0; position: relative; }
 .section + .section { border-top: 1px solid var(--border); }
 
 .section-label {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   color: var(--tx2);
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .section-label::before {
   content: '';
   display: inline-block;
-  width: 16px;
-  height: 1px;
-  background: var(--em);
+  width: 20px; height: 1px;
+  background: var(--am);
 }
 .section-label.cy::before { background: var(--cy); }
 .section-label.pu::before { background: var(--pu); }
 
 .section-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(28px, 4vw, 42px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 3.8vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
   color: var(--white);
   line-height: 1.1;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
-
 .section-lead {
-  font-size: 16px;
+  font-size: 15.5px;
   color: var(--tx2);
-  max-width: 600px;
-  line-height: 1.8;
-  margin-bottom: 48px;
+  max-width: 580px;
+  line-height: 1.82;
+  margin-bottom: 44px;
 }
 
-/* ─── GLASS CARD ─── */
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
+/* ─── REVEAL ANIMATION ─── */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
 }
-.card:hover {
-  border-color: var(--border2);
-  transform: translateY(-3px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
-.card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 50%);
-  pointer-events: none;
-  border-radius: inherit;
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ─── PROBLEM SECTION ─── */
 .problem-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 14px;
+  margin-bottom: 28px;
 }
 @media (max-width: 640px) { .problem-grid { grid-template-columns: 1fr; } }
 
@@ -374,72 +522,140 @@ nav {
   border-radius: var(--radius);
   padding: 24px;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.problem-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(248,113,113,0.03) 0%, transparent 60%);
+  pointer-events: none;
 }
 .problem-card:hover {
-  border-color: rgba(248,113,113,0.25);
+  border-color: rgba(248,113,113,0.22);
   transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
 }
 .problem-icon {
-  font-size: 24px;
-  margin-bottom: 14px;
+  font-size: 22px;
+  margin-bottom: 12px;
   display: block;
 }
 .problem-card h4 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
   color: var(--white);
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
+  margin-bottom: 7px;
 }
 .problem-card p {
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--tx2);
-  line-height: 1.7;
+  line-height: 1.72;
 }
 
 .callout {
-  background: linear-gradient(135deg, rgba(248,113,113,0.06), rgba(251,146,60,0.04));
-  border: 1px solid rgba(248,113,113,0.15);
+  background: linear-gradient(135deg, rgba(248,113,113,0.05), rgba(251,146,60,0.03));
+  border: 1px solid rgba(248,113,113,0.13);
   border-radius: var(--radius);
-  padding: 24px 28px;
-  margin-top: 12px;
+  padding: 22px 26px;
 }
-.callout p {
-  font-size: 15px;
-  color: var(--tx);
-  line-height: 1.8;
-}
+.callout p { font-size: 14.5px; color: var(--tx); line-height: 1.82; }
 .callout strong { color: var(--white); }
 
 /* ─── SOLUTION SECTION ─── */
-.solution-text {
-  font-size: 15px;
-  color: var(--tx);
-  line-height: 1.85;
-  margin-bottom: 14px;
-}
+.solution-text { font-size: 15px; color: var(--tx); line-height: 1.87; margin-bottom: 14px; }
 .solution-text strong { color: var(--white); }
 
 .highlight-box {
-  background: var(--em-bg);
-  border: 1px solid var(--em-bd);
+  background: var(--am-bg);
+  border: 1px solid var(--am-bd);
   border-radius: var(--radius);
   padding: 22px 26px;
-  margin: 28px 0;
+  margin: 26px 0;
 }
-.highlight-box p {
-  font-size: 14.5px;
-  color: var(--tx);
-  line-height: 1.8;
-}
-.highlight-box strong { color: var(--em); }
+.highlight-box p { font-size: 14px; color: var(--tx); line-height: 1.82; }
+.highlight-box strong { color: var(--am); }
 
-/* ─── HOW IT WORKS – PIPELINE ─── */
-.pipeline-wrap {
-  margin: 40px 0;
-  position: relative;
+/* ─── TAGS ─── */
+.tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 34px; }
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  color: var(--tx2);
+  background: var(--surface);
 }
+.tag.am { border-color: var(--am-bd); color: var(--am); background: var(--am-bg); }
+.tag.cy { border-color: var(--cy-bd); color: var(--cy); background: var(--cy-bg); }
+.tag.pu { border-color: var(--pu-bd); color: var(--pu); background: var(--pu-bg); }
+
+/* ─── TECH STACK ─── */
+.stack-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+}
+@media (max-width: 700px) { .stack-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.stack-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: default;
+}
+.stack-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--am-bd);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+.stack-icon { font-size: 26px; margin-bottom: 12px; display: block; }
+.stack-role {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--tx2);
+  margin-bottom: 6px;
+}
+.stack-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--white);
+  line-height: 1.55;
+}
+.stack-name.am { color: var(--am); }
+.stack-name.cy { color: var(--cy); }
+.stack-name.pu { color: var(--pu); }
+
+/* ─── PIPELINE (interactive) ─── */
+.pipeline-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.ptab {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+  color: var(--tx2);
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.06em;
+}
+.ptab:hover { border-color: var(--am-bd); color: var(--tx); }
+.ptab.active { border-color: var(--am-bd); color: var(--am); background: var(--am-bg); }
 
 .pipeline-steps {
   display: flex;
@@ -454,172 +670,133 @@ nav {
   top: 24px;
   bottom: 24px;
   width: 2px;
-  background: linear-gradient(to bottom, var(--em), var(--cy), var(--pu));
+  background: linear-gradient(to bottom, var(--am), var(--cy), var(--pu));
   border-radius: 2px;
+  opacity: 0.5;
 }
-
 .pipe-step {
   display: flex;
   gap: 20px;
-  padding: 20px 0;
+  padding: 18px 0;
   align-items: flex-start;
   position: relative;
+  cursor: pointer;
+  transition: all 0.2s;
 }
+.pipe-step:hover .pipe-content { opacity: 1; }
 .pipe-num {
-  width: 48px;
-  height: 48px;
+  width: 48px; height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   flex-shrink: 0;
   position: relative;
   z-index: 1;
   border: 2px solid;
+  transition: all 0.3s;
 }
-.pipe-num.em { border-color: var(--em); color: var(--em); background: var(--em-bg); }
+.pipe-num.am { border-color: var(--am); color: var(--am); background: var(--am-bg); }
 .pipe-num.cy { border-color: var(--cy); color: var(--cy); background: var(--cy-bg); }
 .pipe-num.pu { border-color: var(--pu); color: var(--pu); background: var(--pu-bg); }
+.pipe-step.highlight .pipe-num.am { background: var(--am); color: #07090e; box-shadow: 0 0 24px rgba(240,160,32,0.35); }
+.pipe-step.highlight .pipe-num.cy { background: var(--cy); color: #07090e; box-shadow: 0 0 24px rgba(34,211,238,0.3); }
+.pipe-step.highlight .pipe-num.pu { background: var(--pu); color: #07090e; box-shadow: 0 0 24px rgba(196,181,253,0.25); }
 
-.pipe-content { flex: 1; padding-top: 10px; }
+.pipe-content { flex: 1; padding-top: 10px; opacity: 0.7; transition: opacity 0.3s; }
+.pipe-step.highlight .pipe-content { opacity: 1; }
 .pipe-content h4 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--white);
-  margin-bottom: 6px;
-  letter-spacing: -0.02em;
+  margin-bottom: 5px;
 }
 .pipe-content p {
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--tx2);
-  line-height: 1.7;
+  line-height: 1.72;
 }
 .pipe-badge {
   display: inline-block;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 9.5px;
   padding: 2px 8px;
   border-radius: 4px;
   margin-top: 8px;
 }
-.pipe-badge.em { background: var(--em-bg); color: var(--em); border: 1px solid var(--em-bd); }
+.pipe-badge.am { background: var(--am-bg); color: var(--am); border: 1px solid var(--am-bd); }
 .pipe-badge.cy { background: var(--cy-bg); color: var(--cy); border: 1px solid var(--cy-bd); }
 .pipe-badge.pu { background: var(--pu-bg); color: var(--pu); border: 1px solid var(--pu-bd); }
 
-/* ─── TECH STACK ─── */
-.stack-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-top: 8px;
-}
-@media (max-width: 700px) { .stack-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 400px) { .stack-grid { grid-template-columns: 1fr; } }
-
-.stack-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 22px 18px;
-  text-align: center;
-  transition: all 0.3s ease;
-  cursor: default;
-}
-.stack-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--border2);
-  box-shadow: 0 16px 50px rgba(0,0,0,0.4);
-}
-.stack-icon { font-size: 28px; margin-bottom: 12px; display: block; }
-.stack-role {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--tx2);
-  margin-bottom: 6px;
-}
-.stack-name {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  color: var(--white);
-  line-height: 1.5;
-}
-.stack-name.em { color: var(--em); }
-.stack-name.cy { color: var(--cy); }
-.stack-name.pu { color: var(--pu); }
-
 /* ─── FEASIBILITY TABLE ─── */
-.ftbl-wrap { overflow-x: auto; margin-top: 8px; }
+.ftbl-wrap { overflow-x: auto; }
 .ftbl {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: 13.5px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 .ftbl th {
   background: var(--surface);
   color: var(--tx2);
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  padding: 14px 18px;
+  padding: 13px 18px;
   text-align: left;
   border-bottom: 1px solid var(--border2);
 }
 .ftbl td {
-  padding: 16px 18px;
+  padding: 15px 18px;
   border-bottom: 1px solid var(--border);
   color: var(--tx);
   vertical-align: top;
   line-height: 1.65;
-  font-size: 13.5px;
 }
 .ftbl tr:last-child td { border-bottom: none; }
-.ftbl tr:hover td { background: rgba(255,255,255,0.015); }
-.ftbl td:first-child { color: var(--white); font-weight: 500; white-space: nowrap; }
-.ftbl { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.ftbl tr:hover td { background: rgba(255,255,255,0.012); }
+.ftbl td:first-child { color: var(--white); font-weight: 600; white-space: nowrap; }
 
 .pill {
   display: inline-block;
-  padding: 3px 10px;
+  padding: 3px 9px;
   border-radius: 100px;
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   text-transform: uppercase;
-  white-space: nowrap;
 }
-.pill-em { background: var(--em-bg); color: var(--em); border: 1px solid var(--em-bd); }
+.pill-em { background: rgba(34,211,238,0.08); color: var(--cy); border: 1px solid var(--cy-bd); }
 .pill-cy { background: var(--cy-bg); color: var(--cy); border: 1px solid var(--cy-bd); }
-.pill-am { background: rgba(251,191,36,0.08); color: #fbbf24; border: 1px solid rgba(251,191,36,0.2); }
+.pill-am { background: var(--am-bg); color: var(--am); border: 1px solid var(--am-bd); }
 
-/* ─── CHALLENGES ─── */
-.ch-list { display: flex; flex-direction: column; gap: 16px; }
+/* ─── CHALLENGES (accordion) ─── */
+.ch-list { display: flex; flex-direction: column; gap: 12px; }
 .ch-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 26px 28px;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
-.ch-card:hover {
-  border-color: var(--border2);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.35);
-}
+.ch-card:hover { border-color: var(--border2); }
 .ch-header {
   display: flex;
   align-items: center;
   gap: 14px;
-  margin-bottom: 14px;
+  padding: 22px 24px;
+  cursor: pointer;
+  user-select: none;
 }
 .ch-num {
-  width: 36px; height: 36px;
+  width: 34px; height: 34px;
   border-radius: var(--radius-sm);
   background: var(--surface2);
   border: 1px solid var(--border2);
@@ -627,215 +804,225 @@ nav {
   align-items: center;
   justify-content: center;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--tx2);
   flex-shrink: 0;
+  transition: all 0.2s;
 }
+.ch-card.open .ch-num { background: var(--am-bg); border-color: var(--am-bd); color: var(--am); }
 .ch-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   color: var(--white);
-  letter-spacing: -0.02em;
+  flex: 1;
 }
-.ch-body { font-size: 13.5px; color: var(--tx2); line-height: 1.75; margin-bottom: 14px; }
+.ch-arrow {
+  color: var(--tx2);
+  font-size: 12px;
+  transition: transform 0.3s;
+}
+.ch-card.open .ch-arrow { transform: rotate(180deg); color: var(--am); }
+.ch-body-wrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+.ch-card.open .ch-body-wrap { max-height: 400px; }
+.ch-body-inner { padding: 0 24px 22px; }
+.ch-body { font-size: 13px; color: var(--tx2); line-height: 1.76; margin-bottom: 12px; }
 .ch-fix {
-  background: var(--em-bg);
-  border: 1px solid var(--em-bd);
+  background: var(--am-bg);
+  border: 1px solid var(--am-bd);
   border-radius: var(--radius-sm);
-  padding: 14px 18px;
-  font-size: 13.5px;
+  padding: 13px 16px;
+  font-size: 13px;
   color: var(--tx);
   line-height: 1.72;
 }
-.ch-fix strong { color: var(--em); }
+.ch-fix strong { color: var(--am); }
 
 /* ─── COMPARISON ─── */
-.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px; }
 @media (max-width: 560px) { .cmp-grid { grid-template-columns: 1fr; } }
-
 .cmp-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 24px;
-  transition: all 0.3s ease;
+  padding: 22px;
+  transition: all 0.3s;
 }
 .cmp-card:hover { transform: translateY(-2px); border-color: var(--border2); }
 .cmp-card h4 {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--tx2);
-  margin-bottom: 12px;
+  margin-bottom: 11px;
 }
-.cmp-card p { font-size: 13.5px; color: var(--tx); line-height: 1.72; }
-.cmp-card.accent { border-color: var(--em-bd); background: var(--em-bg); }
-.cmp-card.accent h4 { color: var(--em); }
+.cmp-card p { font-size: 13px; color: var(--tx); line-height: 1.72; }
+.cmp-card.accent { border-color: var(--am-bd); background: var(--am-bg); }
+.cmp-card.accent h4 { color: var(--am); }
 
 .ref-box {
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 3px solid var(--cy);
   border-radius: var(--radius-sm);
-  padding: 18px 22px;
-  font-size: 13.5px;
+  padding: 16px 20px;
+  font-size: 13px;
   color: var(--tx2);
   line-height: 1.75;
 }
 .ref-box strong { color: var(--cy); }
-.ref-box em { color: var(--tx); font-style: italic; }
 
-/* ─── FUTURE SCOPE ─── */
+/* ─── FUTURE GRID ─── */
 .future-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  gap: 12px;
 }
 @media (max-width: 700px) { .future-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 480px) { .future-grid { grid-template-columns: 1fr; } }
-
 .future-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 22px;
-  transition: all 0.3s ease;
+  padding: 20px;
+  transition: all 0.3s;
 }
 .future-card:hover {
   transform: translateY(-3px);
   border-color: var(--pu-bd);
-  box-shadow: 0 12px 40px rgba(167,139,250,0.08);
+  box-shadow: 0 12px 40px rgba(196,181,253,0.06);
 }
-.future-card .icon { font-size: 22px; margin-bottom: 14px; display: block; }
+.future-card .icon { font-size: 20px; margin-bottom: 12px; display: block; }
 .future-card h4 {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 700;
   color: var(--white);
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
+  margin-bottom: 7px;
 }
-.future-card p { font-size: 12.5px; color: var(--tx2); line-height: 1.65; }
+.future-card p { font-size: 12px; color: var(--tx2); line-height: 1.65; }
 
-/* ─── IMPACT STATS ─── */
+/* ─── IMPACT STATS (animated counters) ─── */
 .impact-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
-  margin-bottom: 36px;
+  gap: 12px;
+  margin-bottom: 32px;
 }
 @media (max-width: 700px) { .impact-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 400px) { .impact-grid { grid-template-columns: 1fr; } }
-
 .impact-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 24px 20px;
+  padding: 24px 18px;
   text-align: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.impact-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, transparent 60%);
+  pointer-events: none;
 }
 .impact-card:hover { transform: translateY(-3px); border-color: var(--border2); }
 .impact-num {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 30px;
-  font-weight: 700;
-  letter-spacing: -0.05em;
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
   line-height: 1;
   margin-bottom: 8px;
 }
-.impact-num.em { color: var(--em); }
+.impact-num.am { color: var(--am); }
 .impact-num.cy { color: var(--cy); }
 .impact-num.pu { color: var(--pu); }
-.impact-num.am { color: #fbbf24; }
-.impact-label { font-size: 12px; color: var(--tx2); line-height: 1.5; }
+.impact-num.wh { color: var(--white); }
+.impact-label { font-size: 11.5px; color: var(--tx2); line-height: 1.5; }
 
 /* ─── QUOTE ─── */
 .quote-block {
-  background: linear-gradient(135deg, rgba(16,217,160,0.05), rgba(56,189,248,0.03), rgba(167,139,250,0.04));
-  border: 1px solid rgba(16,217,160,0.15);
+  background: linear-gradient(135deg, rgba(240,160,32,0.05), rgba(34,211,238,0.03));
+  border: 1px solid rgba(240,160,32,0.14);
   border-radius: var(--radius-lg);
   padding: 40px 44px;
-  margin: 48px 0;
+  margin: 44px 0;
   position: relative;
   overflow: hidden;
 }
 .quote-block::before {
   content: '"';
   position: absolute;
-  top: -10px; left: 20px;
-  font-size: 140px;
-  font-family: Georgia, serif;
-  color: rgba(16,217,160,0.07);
+  top: -16px; left: 18px;
+  font-family: 'Playfair Display', serif;
+  font-size: 160px;
+  color: rgba(240,160,32,0.07);
   line-height: 1;
   pointer-events: none;
 }
 .quote-block blockquote {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(17px, 2.5vw, 22px);
-  font-weight: 400;
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(17px, 2.3vw, 22px);
+  font-weight: 700;
+  font-style: italic;
   color: var(--white);
-  line-height: 1.65;
-  letter-spacing: -0.02em;
+  line-height: 1.6;
 }
 .quote-attr {
-  margin-top: 18px;
-  font-size: 13px;
+  margin-top: 16px;
+  font-size: 12px;
   color: var(--tx2);
   font-family: 'JetBrains Mono', monospace;
 }
 
 /* ─── CONCLUSION ─── */
 .conc-card {
-  background: linear-gradient(135deg, rgba(16,217,160,0.05) 0%, rgba(56,189,248,0.03) 50%, rgba(167,139,250,0.04) 100%);
-  border: 1px solid var(--em-bd);
+  background: linear-gradient(135deg, rgba(240,160,32,0.04) 0%, rgba(34,211,238,0.02) 50%, rgba(196,181,253,0.03) 100%);
+  border: 1px solid var(--am-bd);
   border-radius: var(--radius-lg);
-  padding: 44px 48px;
+  padding: 42px 48px;
 }
-.conc-card p { font-size: 15px; color: var(--tx); line-height: 1.85; margin-bottom: 16px; }
+@media (max-width: 640px) { .conc-card { padding: 26px 22px; } }
+.conc-card p { font-size: 15px; color: var(--tx); line-height: 1.87; margin-bottom: 16px; }
 .conc-card p:last-child { margin-bottom: 0; }
 .conc-card strong { color: var(--white); }
 
 /* ─── FOOTER ─── */
 footer {
   border-top: 1px solid var(--border);
-  padding: 40px 24px;
+  padding: 38px 26px;
   position: relative;
   z-index: 1;
 }
 .footer-inner {
-  max-width: 900px;
+  max-width: 920px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 18px;
 }
-.footer-brand {}
 .footer-logo {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Playfair Display', serif;
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--white);
-  letter-spacing: -0.03em;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
-.footer-logo span { color: var(--em); }
-.footer-by { font-size: 12px; color: var(--tx2); }
+.footer-logo span { color: var(--am); }
+.footer-by { font-size: 11.5px; color: var(--tx2); }
 .footer-by strong { color: var(--tx); font-weight: 500; }
-
-.footer-tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
+.footer-tags { display: flex; gap: 7px; flex-wrap: wrap; }
 .footer-tag {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
+  font-size: 9px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--tx2);
@@ -845,21 +1032,6 @@ footer {
   border-radius: 4px;
 }
 
-/* ─── CHIPS / TAGS ─── */
-.tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 36px; }
-.tag {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10.5px;
-  padding: 4px 12px;
-  border-radius: 100px;
-  border: 1px solid var(--border);
-  color: var(--tx2);
-  background: var(--surface);
-}
-.tag.em { border-color: var(--em-bd); color: var(--em); background: var(--em-bg); }
-.tag.cy { border-color: var(--cy-bd); color: var(--cy); background: var(--cy-bg); }
-.tag.pu { border-color: var(--pu-bd); color: var(--pu); background: var(--pu-bg); }
-
 /* ─── DIVIDER ─── */
 .divider {
   height: 1px;
@@ -867,62 +1039,47 @@ footer {
   margin: 8px 0;
 }
 
-/* ─── SCROLL ANIMATIONS ─── */
-.reveal {
-  opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 /* ─── RESPONSIVE ─── */
 @media (max-width: 768px) {
-  .hero-title { font-size: 38px; }
   .nav-links { display: none; }
   .container { padding: 0 18px; }
-  .section { padding: 72px 0; }
-  .conc-card { padding: 28px 24px; }
-  .quote-block { padding: 28px 28px; }
-  .problem-grid { grid-template-columns: 1fr; }
-  .model-row { grid-template-columns: 1fr 1fr; }
+  .section { padding: 68px 0; }
+  .quote-block { padding: 26px 26px; }
   .impact-grid { grid-template-columns: 1fr 1fr; }
 }
-
 @media (max-width: 480px) {
-  .hero-title { font-size: 30px; }
   .hero-btns { flex-direction: column; }
   .btn-primary, .btn-secondary { justify-content: center; }
 }
 
-/* ─── UTILITY ─── */
+/* ─── UTILITIES ─── */
 .mono { font-family: 'JetBrains Mono', monospace; }
-.em { color: var(--em); }
+.am { color: var(--am); }
 .cy { color: var(--cy); }
 .pu { color: var(--pu); }
 .muted { color: var(--tx2); }
-.white { color: var(--white); }
 strong { color: var(--white); font-weight: 600; }
 
-.section-divider {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+/* ─── TYPING CURSOR ─── */
+.typing-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 12px;
+  background: var(--am);
+  margin-left: 1px;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
 }
-.section-divider-line {
-  flex: 1;
-  height: 1px;
-  background: var(--border);
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
-
-/* nav underline active */
-.nav-links a.active { color: var(--em); }
 </style>
 </head>
 <body>
+
+<!-- cursor spotlight -->
+<div id="spotlight"></div>
 
 <!-- ─── NAV ─── -->
 <nav id="nav">
@@ -946,44 +1103,107 @@ strong { color: var(--white); font-weight: 600; }
   <div class="orb orb-3"></div>
   <div class="container">
     <div class="hero-inner">
-      <div class="hero-eyebrow">AI-Powered · Retrieval Augmented Generation</div>
-      <h1 class="hero-title">
-        Accurate answers.<br>
-        Grounded in your<br>
-        <span class="grad">campus documents.</span>
-      </h1>
-      <p class="hero-sub">
-        CampusIQ replaces hallucinated AI answers with responses backed by real sources — your syllabus, rubrics, and campus resources. Every answer comes with a citation.
-      </p>
-      <div class="hero-btns">
-        <a href="#pipeline" class="btn-primary">
-          <span>⚡</span> View Architecture
-        </a>
-        <a href="#solution" class="btn-secondary">
-          <span>→</span> Explore Features
-        </a>
-        <a href="#" class="btn-secondary">
-          <span>🔗</span> GitHub
-        </a>
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="dot"></span>
+          AI-Powered · Retrieval-Augmented Generation
+        </div>
+        <h1 class="hero-title">
+          <span class="line-small">The answer is in your syllabus.</span>
+          <em>Find it instantly.</em><br>
+          Trust it completely.
+        </h1>
+        <p class="hero-sub">
+          CampusIQ replaces hallucinated AI answers with responses backed by your actual campus documents — syllabi, rubrics, and announcements. Every answer includes a source citation.
+        </p>
+        <div class="hero-btns">
+          <a href="#pipeline" class="btn-primary">⚡ View Architecture</a>
+          <a href="#solution" class="btn-secondary">→ Explore Features</a>
+          <a href="#" class="btn-secondary">🔗 GitHub</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <div class="stat-num"><span class="accent">$</span>0</div>
+            <div class="stat-label">Operational cost<br>with self-hosted LLM</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">2–3<span class="accent">w</span></div>
+            <div class="stat-label">Prototype ready<br>in weeks</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">100<span class="accent">%</span></div>
+            <div class="stat-label">Source-cited<br>responses</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-num">∞</div>
+            <div class="stat-label">Horizontally<br>scalable</div>
+          </div>
+        </div>
       </div>
-      <div class="hero-stats">
-        <div class="stat-item">
-          <div class="stat-num">0<span>$</span></div>
-          <div class="stat-label">Operational cost<br>with self-hosted LLM</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num">2–3<span>w</span></div>
-          <div class="stat-label">Prototype ready<br>in weeks</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num">100<span>%</span></div>
-          <div class="stat-label">Source-cited<br>responses</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-num">∞</div>
-          <div class="stat-label">Horizontally<br>scalable</div>
+
+      <!-- ─── INTERACTIVE DEMO TERMINAL ─── -->
+      <div class="hero-right">
+        <div class="demo-terminal">
+          <div class="demo-titlebar">
+            <div class="demo-dot demo-dot-r"></div>
+            <div class="demo-dot demo-dot-y"></div>
+            <div class="demo-dot demo-dot-g"></div>
+            <div class="demo-title-label">campusiq · live demo</div>
+          </div>
+          <div class="demo-body">
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--tx2);margin-bottom:10px;letter-spacing:0.06em;">SELECT A QUESTION TO TRY:</div>
+            <div class="demo-questions">
+              <div class="demo-q-btn" data-idx="0">
+                <span class="demo-q-icon">📅</span>
+                When is the final project submission deadline?
+              </div>
+              <div class="demo-q-btn" data-idx="1">
+                <span class="demo-q-icon">📋</span>
+                What percentage is the midterm worth?
+              </div>
+              <div class="demo-q-btn" data-idx="2">
+                <span class="demo-q-icon">📖</span>
+                Is late submission allowed for assignments?
+              </div>
+            </div>
+
+            <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--tx2);margin-bottom:8px;letter-spacing:0.06em;margin-top:14px;">RAG PIPELINE:</div>
+            <div class="demo-pipeline" id="demoPipeline">
+              <div class="demo-pipe-step" data-step="0">
+                <div class="demo-pipe-icon">🔍</div>
+                <div class="demo-pipe-label">Query embedding</div>
+                <div class="demo-pipe-check">✓</div>
+              </div>
+              <div class="demo-pipe-step" data-step="1">
+                <div class="demo-pipe-icon">⚡</div>
+                <div class="demo-pipe-label">HyDE rewrite</div>
+                <div class="demo-pipe-check">✓</div>
+              </div>
+              <div class="demo-pipe-step" data-step="2">
+                <div class="demo-pipe-icon">🗃️</div>
+                <div class="demo-pipe-label">Vector retrieval</div>
+                <div class="demo-pipe-check">✓</div>
+              </div>
+              <div class="demo-pipe-step" data-step="3">
+                <div class="demo-pipe-icon">🤖</div>
+                <div class="demo-pipe-label">LLM generation</div>
+                <div class="demo-pipe-check">✓</div>
+              </div>
+            </div>
+
+            <div class="demo-answer" id="demoAnswer">
+              <div class="demo-answer-text" id="demoText"></div>
+              <div class="demo-cite">
+                <div class="demo-cite-dot"></div>
+                <span id="demoCite"></span>
+              </div>
+            </div>
+
+            <button class="demo-run-btn" id="demoRunBtn" disabled>Select a question above</button>
+          </div>
         </div>
       </div>
+
     </div>
   </div>
 </section>
@@ -998,7 +1218,6 @@ strong { color: var(--white); font-weight: 600; }
         Students don't have one reliable place for academic info. So they turn to ChatGPT — which has never seen their syllabus.
       </p>
     </div>
-
     <div class="problem-grid reveal">
       <div class="problem-card">
         <span class="problem-icon">📂</span>
@@ -1021,7 +1240,6 @@ strong { color: var(--white); font-weight: 600; }
         <p>There's currently no tool that gives students AI-speed answers grounded in actual campus resources. Students are forced to choose between speed and accuracy.</p>
       </div>
     </div>
-
     <div class="callout reveal">
       <p>
         AI hallucination isn't an occasional bug — it's a <strong>structural property</strong> of how language models work. They don't "know" facts; they predict likely text. Without retrieval, no amount of fine-tuning fully solves this. <strong>CampusIQ is built to close that gap.</strong>
@@ -1040,7 +1258,6 @@ strong { color: var(--white); font-weight: 600; }
         A RAG system that searches verified campus documents first — and only then generates a response, strictly grounded in what it found.
       </p>
     </div>
-
     <div class="reveal">
       <p class="solution-text">
         <strong>CampusIQ</strong> is a Retrieval-Augmented Generation (RAG) system built for academic environments. Rather than relying on what an AI model "thinks it knows," CampusIQ first searches a curated database of campus-specific documents, retrieves the most relevant content, and only then generates a response — constrained entirely to that retrieved evidence.
@@ -1049,16 +1266,14 @@ strong { color: var(--white); font-weight: 600; }
         If the answer isn't in the documents, the system says so — clearly and explicitly — instead of making something up.
       </p>
     </div>
-
     <div class="highlight-box reveal">
       <p>
         <strong>Why RAG reduces hallucinations:</strong> Language models hallucinate because they simulate recall rather than perform it — they generate probable text, not verified facts. RAG fixes this by removing the model from the role of fact-store entirely. The document corpus holds the knowledge; the LLM only reasons over what retrieval hands it. That architectural separation is what makes responses trustworthy.
       </p>
     </div>
-
     <div class="tag-row reveal">
-      <span class="tag em">RAG Architecture</span>
-      <span class="tag em">Semantic Search</span>
+      <span class="tag am">RAG Architecture</span>
+      <span class="tag am">Semantic Search</span>
       <span class="tag cy">Vector Databases</span>
       <span class="tag cy">LLM Orchestration</span>
       <span class="tag pu">Source Citations</span>
@@ -1066,16 +1281,14 @@ strong { color: var(--white); font-weight: 600; }
       <span class="tag">Embeddings</span>
       <span class="tag">Open Source</span>
     </div>
-
-    <!-- Tech Stack -->
     <div class="reveal" id="techstack">
-      <div class="section-label cy" style="margin-top: 8px;">Technology Stack</div>
+      <div class="section-label cy" style="margin-top:8px;">Technology Stack</div>
     </div>
     <div class="stack-grid reveal">
       <div class="stack-card">
         <span class="stack-icon">🧠</span>
         <div class="stack-role">Embedding Model</div>
-        <div class="stack-name em">BAAI/<br>bge-large-en-v1.5</div>
+        <div class="stack-name am">BAAI/<br>bge-large-en-v1.5</div>
       </div>
       <div class="stack-card">
         <span class="stack-icon">⚡</span>
@@ -1103,32 +1316,34 @@ strong { color: var(--white); font-weight: 600; }
       <div class="section-label">Section 03</div>
       <h2 class="section-title">How It Works</h2>
       <p class="section-lead">
-        From raw campus documents to a cited, grounded answer — in one seamless pipeline.
+        From raw campus documents to a cited, grounded answer — in one seamless pipeline. Click any step to highlight it.
       </p>
     </div>
-
+    <div class="pipeline-tabs reveal" id="pipelineTabs">
+      <button class="ptab active" data-filter="all">All Steps</button>
+      <button class="ptab" data-filter="ingest">Ingestion</button>
+      <button class="ptab" data-filter="retrieval">Retrieval</button>
+      <button class="ptab" data-filter="generation">Generation</button>
+    </div>
     <div class="pipeline-wrap reveal">
-      <div class="pipeline-steps">
-
-        <div class="pipe-step">
-          <div class="pipe-num em">01</div>
+      <div class="pipeline-steps" id="pipelineSteps">
+        <div class="pipe-step highlight" data-phase="ingest">
+          <div class="pipe-num am">01</div>
           <div class="pipe-content">
             <h4>Ingest Campus Documents</h4>
             <p>Syllabi, lecture notes, assignment briefs, lab manuals, LMS announcements, and past exam papers are collected as PDFs, DOCX files, or HTML pages. PyMuPDF handles extraction and cleaning.</p>
-            <span class="pipe-badge em">PDF · DOCX · HTML</span>
+            <span class="pipe-badge am">PDF · DOCX · HTML</span>
           </div>
         </div>
-
-        <div class="pipe-step">
-          <div class="pipe-num em">02</div>
+        <div class="pipe-step highlight" data-phase="ingest">
+          <div class="pipe-num am">02</div>
           <div class="pipe-content">
             <h4>Semantic Chunking</h4>
             <p>Documents are split into meaningful chunks of 300–500 tokens, with a 50-token overlap between adjacent chunks so no information is lost at boundaries.</p>
-            <span class="pipe-badge em">300–500 tok · 50 overlap</span>
+            <span class="pipe-badge am">300–500 tok · 50 overlap</span>
           </div>
         </div>
-
-        <div class="pipe-step">
+        <div class="pipe-step highlight" data-phase="retrieval">
           <div class="pipe-num cy">03</div>
           <div class="pipe-content">
             <h4>Generate Embeddings</h4>
@@ -1136,8 +1351,7 @@ strong { color: var(--white); font-weight: 600; }
             <span class="pipe-badge cy">bge-large-en-v1.5</span>
           </div>
         </div>
-
-        <div class="pipe-step">
+        <div class="pipe-step highlight" data-phase="retrieval">
           <div class="pipe-num cy">04</div>
           <div class="pipe-content">
             <h4>Store in Vector Database</h4>
@@ -1145,8 +1359,7 @@ strong { color: var(--white); font-weight: 600; }
             <span class="pipe-badge cy">ChromaDB → Pinecone</span>
           </div>
         </div>
-
-        <div class="pipe-step">
+        <div class="pipe-step highlight" data-phase="retrieval">
           <div class="pipe-num pu">05</div>
           <div class="pipe-content">
             <h4>Query Rewriting with HyDE</h4>
@@ -1154,8 +1367,7 @@ strong { color: var(--white); font-weight: 600; }
             <span class="pipe-badge pu">HyDE Rewrite</span>
           </div>
         </div>
-
-        <div class="pipe-step">
+        <div class="pipe-step highlight" data-phase="retrieval">
           <div class="pipe-num pu">06</div>
           <div class="pipe-content">
             <h4>Retrieve Top-5 Matches</h4>
@@ -1163,22 +1375,20 @@ strong { color: var(--white); font-weight: 600; }
             <span class="pipe-badge pu">Cosine Similarity · BM25</span>
           </div>
         </div>
-
-        <div class="pipe-step">
-          <div class="pipe-num em">07</div>
+        <div class="pipe-step highlight" data-phase="generation">
+          <div class="pipe-num am">07</div>
           <div class="pipe-content">
             <h4>Generate a Cited Response</h4>
             <p>The LLM receives only the retrieved chunks as context. It generates a response grounded strictly in those documents, and includes a direct source citation so students can verify what they're told.</p>
-            <span class="pipe-badge em">Source-Cited Output</span>
+            <span class="pipe-badge am">Source-Cited Output</span>
           </div>
         </div>
-
       </div>
     </div>
   </div>
 </section>
 
-<!-- ─── FEASIBILITY / VIABILITY ─── -->
+<!-- ─── FEASIBILITY ─── -->
 <section class="section" id="feasibility">
   <div class="container">
     <div class="reveal">
@@ -1239,48 +1449,46 @@ strong { color: var(--white); font-weight: 600; }
         Real risks, honestly addressed — with concrete architectural solutions for each.
       </p>
     </div>
-
     <div class="ch-list reveal">
-
-      <div class="ch-card">
-        <div class="ch-header">
+      <div class="ch-card open">
+        <div class="ch-header" onclick="toggleChallenge(this)">
           <div class="ch-num">01</div>
           <div class="ch-title">Stale or Outdated Documents</div>
+          <div class="ch-arrow">▼</div>
         </div>
-        <div class="ch-body">
-          If an old version of a syllabus or rubric stays indexed, students receive formally correct but factually wrong answers — the exact failure mode the system is meant to prevent, now with an air of authority behind it.
-        </div>
-        <div class="ch-fix">
-          <strong>Fix:</strong> Document versioning with upload timestamps and deprecation flags. When faculty upload a new file, older versions are automatically marked superseded. Responses drawn from older documents display a visible staleness warning.
+        <div class="ch-body-wrap">
+          <div class="ch-body-inner">
+            <div class="ch-body">If an old version of a syllabus or rubric stays indexed, students receive formally correct but factually wrong answers — the exact failure mode the system is meant to prevent, now with an air of authority behind it.</div>
+            <div class="ch-fix"><strong>Fix:</strong> Document versioning with upload timestamps and deprecation flags. When faculty upload a new file, older versions are automatically marked superseded. Responses drawn from older documents display a visible staleness warning.</div>
+          </div>
         </div>
       </div>
-
       <div class="ch-card">
-        <div class="ch-header">
+        <div class="ch-header" onclick="toggleChallenge(this)">
           <div class="ch-num">02</div>
           <div class="ch-title">Privacy & Data Security</div>
+          <div class="ch-arrow">▼</div>
         </div>
-        <div class="ch-body">
-          Student queries may contain personal context — grades, disputes, personal circumstances. Sending these to a third-party API raises genuine FERPA compliance and data residency concerns at institutional scale.
-        </div>
-        <div class="ch-fix">
-          <strong>Fix:</strong> The architecture is designed for full self-hosting using Mistral-7B on campus infrastructure — no data leaves institutional servers. Role-based access controls restrict document visibility to enrolled courses only. Query anonymization is applied at the API gateway before any processing.
+        <div class="ch-body-wrap">
+          <div class="ch-body-inner">
+            <div class="ch-body">Student queries may contain personal context — grades, disputes, personal circumstances. Sending these to a third-party API raises genuine FERPA compliance and data residency concerns at institutional scale.</div>
+            <div class="ch-fix"><strong>Fix:</strong> The architecture is designed for full self-hosting using Mistral-7B on campus infrastructure — no data leaves institutional servers. Role-based access controls restrict document visibility to enrolled courses only. Query anonymization is applied at the API gateway before any processing.</div>
+          </div>
         </div>
       </div>
-
       <div class="ch-card">
-        <div class="ch-header">
+        <div class="ch-header" onclick="toggleChallenge(this)">
           <div class="ch-num">03</div>
           <div class="ch-title">Vague or Ambiguous Student Queries</div>
+          <div class="ch-arrow">▼</div>
         </div>
-        <div class="ch-body">
-          Students rarely phrase questions precisely — "what about the project submission?" gives the retrieval system very little to work with, producing poor matches and ultimately unhelpful responses.
-        </div>
-        <div class="ch-fix">
-          <strong>Fix:</strong> Hybrid retrieval (dense vector search + sparse BM25) improves recall across both semantic and keyword-specific queries. HyDE rewrites the student's question into an ideal answer form before embedding — significantly improving retrieval on vague inputs. A clarification prompt is triggered automatically when similarity scores fall below a confidence threshold.
+        <div class="ch-body-wrap">
+          <div class="ch-body-inner">
+            <div class="ch-body">Students rarely phrase questions precisely — "what about the project submission?" gives the retrieval system very little to work with, producing poor matches and ultimately unhelpful responses.</div>
+            <div class="ch-fix"><strong>Fix:</strong> Hybrid retrieval (dense vector search + sparse BM25) improves recall across both semantic and keyword-specific queries. HyDE rewrites the student's question into an ideal answer form before embedding — significantly improving retrieval on vague inputs. A clarification prompt is triggered automatically when similarity scores fall below a confidence threshold.</div>
+          </div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
@@ -1291,11 +1499,8 @@ strong { color: var(--white); font-weight: 600; }
     <div class="reveal">
       <div class="section-label">Section 06</div>
       <h2 class="section-title">How CampusIQ Compares</h2>
-      <p class="section-lead">
-        NotebookLM proved document-grounded AI works. CampusIQ takes that idea to institutional scale.
-      </p>
+      <p class="section-lead">NotebookLM proved document-grounded AI works. CampusIQ takes that idea to institutional scale.</p>
     </div>
-
     <div class="cmp-grid reveal">
       <div class="cmp-card">
         <h4>Google NotebookLM</h4>
@@ -1306,7 +1511,6 @@ strong { color: var(--white); font-weight: 600; }
         <p>NotebookLM is a personal productivity tool built for individual notes. CampusIQ is institutional infrastructure — multi-tenant, multi-course, LMS-integrated, FERPA-conscious, and role-aware. Built for an entire campus, not one person.</p>
       </div>
     </div>
-
     <div class="ref-box reveal">
       <strong>Research Foundation —</strong> Lewis et al. (2020), <em>"Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"</em> (NeurIPS). This foundational paper demonstrated that retrieval-augmented models substantially outperform closed-book LLMs on factual accuracy benchmarks — the empirical basis for why RAG is the right architectural choice here.
     </div>
@@ -1319,11 +1523,8 @@ strong { color: var(--white); font-weight: 600; }
     <div class="reveal">
       <div class="section-label pu">Section 07</div>
       <h2 class="section-title">Future Scope</h2>
-      <p class="section-lead">
-        CampusIQ is a foundation, not a finished product. Here's where it can go next.
-      </p>
+      <p class="section-lead">CampusIQ is a foundation, not a finished product. Here's where it can go next.</p>
     </div>
-
     <div class="future-grid reveal">
       <div class="future-card">
         <span class="icon">🔗</span>
@@ -1363,36 +1564,30 @@ strong { color: var(--white); font-weight: 600; }
 <section class="section" id="impact">
   <div class="container">
     <div class="reveal">
-      <div class="section-label em">Section 08</div>
+      <div class="section-label am">Section 08</div>
       <h2 class="section-title">Impact</h2>
-      <p class="section-lead">
-        Every metric that matters — accuracy, trust, and time saved — moves in the right direction.
-      </p>
+      <p class="section-lead">Every metric that matters — accuracy, trust, and time saved — moves in the right direction.</p>
     </div>
-
     <div class="impact-grid reveal">
       <div class="impact-card">
-        <div class="impact-num em">↑ 85%</div>
+        <div class="impact-num am"><span class="counter" data-target="85" data-prefix="↑" data-suffix="%">↑0%</span></div>
         <div class="impact-label">Response accuracy<br>vs. baseline LLM</div>
       </div>
       <div class="impact-card">
-        <div class="impact-num cy">3×</div>
+        <div class="impact-num cy"><span class="counter" data-target="3" data-suffix="×">0×</span></div>
         <div class="impact-label">Faster than manual<br>document search</div>
       </div>
       <div class="impact-card">
-        <div class="impact-num pu">100%</div>
+        <div class="impact-num pu"><span class="counter" data-target="100" data-suffix="%">0%</span></div>
         <div class="impact-label">Responses include<br>source citations</div>
       </div>
       <div class="impact-card">
-        <div class="impact-num am">$0</div>
+        <div class="impact-num wh">$0</div>
         <div class="impact-label">Operational cost with<br>self-hosted Mistral-7B</div>
       </div>
     </div>
-
     <div class="quote-block reveal">
-      <blockquote>
-        "Students currently have to choose between slow manual searching and fast but unreliable AI. CampusIQ offers a third option — AI that is both fast and grounded in verified sources."
-      </blockquote>
+      <blockquote>"Students currently have to choose between slow manual searching and fast but unreliable AI. CampusIQ offers a third option — AI that is both fast and grounded in verified sources."</blockquote>
       <div class="quote-attr">— CampusIQ Project Vision</div>
     </div>
   </div>
@@ -1405,17 +1600,10 @@ strong { color: var(--white); font-weight: 600; }
       <div class="section-label">Section 09</div>
       <h2 class="section-title">Conclusion</h2>
     </div>
-
     <div class="conc-card reveal">
-      <p>
-        CampusIQ applies a technically proven approach — Retrieval-Augmented Generation — to a problem that is genuinely unsolved in most academic environments. Students currently have to choose between slow manual searching and fast but unreliable AI. This system offers a third option: <strong>AI that is both fast and grounded in verified sources.</strong>
-      </p>
-      <p>
-        The architecture is practical. The stack is low-cost and open-source. A working prototype is realistic within weeks, and the system scales naturally as more campus documents are added. Every response comes with a citation, which means students can verify what they're told — and that changes the relationship between AI tools and academic trust, <strong>fundamentally.</strong>
-      </p>
-      <p>
-        That's what makes CampusIQ worth building.
-      </p>
+      <p>CampusIQ applies a technically proven approach — Retrieval-Augmented Generation — to a problem that is genuinely unsolved in most academic environments. Students currently have to choose between slow manual searching and fast but unreliable AI. This system offers a third option: <strong>AI that is both fast and grounded in verified sources.</strong></p>
+      <p>The architecture is practical. The stack is low-cost and open-source. A working prototype is realistic within weeks, and the system scales naturally as more campus documents are added. Every response comes with a citation, which means students can verify what they're told — and that changes the relationship between AI tools and academic trust, <strong>fundamentally.</strong></p>
+      <p>That's what makes CampusIQ worth building.</p>
     </div>
   </div>
 </section>
@@ -1423,7 +1611,7 @@ strong { color: var(--white); font-weight: 600; }
 <!-- ─── FOOTER ─── -->
 <footer>
   <div class="footer-inner">
-    <div class="footer-brand">
+    <div>
       <div class="footer-logo">Campus<span>IQ</span></div>
       <div class="footer-by">Created by <strong>Sarthak Bhargav</strong></div>
     </div>
@@ -1438,28 +1626,45 @@ strong { color: var(--white); font-weight: 600; }
 </footer>
 
 <script>
+/* ── Cursor spotlight ── */
+const spotlight = document.getElementById('spotlight');
+let spotVisible = false;
+document.addEventListener('mousemove', (e) => {
+  spotlight.style.left = e.clientX + 'px';
+  spotlight.style.top = e.clientY + 'px';
+  if (!spotVisible) { spotlight.style.opacity = '1'; spotVisible = true; }
+});
+document.addEventListener('mouseleave', () => { spotlight.style.opacity = '0'; spotVisible = false; });
+
 /* ── Scroll reveal ── */
 const reveals = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry, i) => {
     if (entry.isIntersecting) {
-      setTimeout(() => {
-        entry.target.classList.add('visible');
-      }, i * 60);
+      setTimeout(() => entry.target.classList.add('visible'), i * 55);
       observer.unobserve(entry.target);
     }
   });
 }, { threshold: 0.07 });
 reveals.forEach(el => observer.observe(el));
 
+/* ── Stagger grid children ── */
+document.querySelectorAll('.problem-grid, .stack-grid, .future-grid, .impact-grid, .cmp-grid').forEach(grid => {
+  Array.from(grid.children).forEach((child, i) => {
+    child.style.transitionDelay = (i * 75) + 'ms';
+    child.classList.add('reveal');
+    observer.observe(child);
+  });
+});
+
 /* ── Nav scroll style ── */
 const nav = document.getElementById('nav');
 window.addEventListener('scroll', () => {
   if (window.scrollY > 40) {
-    nav.style.background = 'rgba(8,12,16,0.95)';
-    nav.style.boxShadow = '0 1px 30px rgba(0,0,0,0.5)';
+    nav.style.background = 'rgba(7,9,14,0.97)';
+    nav.style.boxShadow = '0 1px 28px rgba(0,0,0,0.6)';
   } else {
-    nav.style.background = 'rgba(8,12,16,0.8)';
+    nav.style.background = 'rgba(7,9,14,0.85)';
     nav.style.boxShadow = 'none';
   }
 });
@@ -1477,18 +1682,128 @@ const sectionObserver = new IntersectionObserver((entries) => {
       });
     }
   });
-}, { threshold: 0.3 });
+}, { threshold: 0.35 });
 sections.forEach(s => sectionObserver.observe(s));
 
-/* ── Smooth staggered reveal for grids ── */
-document.querySelectorAll('.problem-grid, .stack-grid, .future-grid, .impact-grid, .cmp-grid').forEach(grid => {
-  const children = grid.children;
-  Array.from(children).forEach((child, i) => {
-    child.style.transitionDelay = (i * 80) + 'ms';
-    child.classList.add('reveal');
-    observer.observe(child);
+/* ── Pipeline tabs ── */
+document.getElementById('pipelineTabs').addEventListener('click', (e) => {
+  const btn = e.target.closest('.ptab');
+  if (!btn) return;
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const filter = btn.dataset.filter;
+  document.querySelectorAll('.pipe-step').forEach(step => {
+    if (filter === 'all' || step.dataset.phase === filter) {
+      step.classList.add('highlight');
+      step.style.opacity = '1';
+    } else {
+      step.classList.remove('highlight');
+      step.style.opacity = '0.25';
+    }
   });
 });
+
+/* ── Pipeline step click highlight ── */
+document.getElementById('pipelineSteps').addEventListener('click', (e) => {
+  const step = e.target.closest('.pipe-step');
+  if (!step) return;
+  document.querySelectorAll('.pipe-step').forEach(s => { s.classList.remove('highlight'); s.style.opacity = '0.25'; });
+  step.classList.add('highlight');
+  step.style.opacity = '1';
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  document.querySelector('.ptab[data-filter="all"]').classList.add('active');
+});
+
+/* ── Accordion challenges ── */
+function toggleChallenge(header) {
+  const card = header.parentElement;
+  const isOpen = card.classList.contains('open');
+  document.querySelectorAll('.ch-card').forEach(c => c.classList.remove('open'));
+  if (!isOpen) card.classList.add('open');
+}
+
+/* ── Animated counters ── */
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    const el = entry.target;
+    const target = parseInt(el.dataset.target);
+    const prefix = el.dataset.prefix || '';
+    const suffix = el.dataset.suffix || '';
+    const duration = 1400;
+    const start = performance.now();
+    function animate(now) {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(eased * target);
+      el.textContent = prefix + current + suffix;
+      if (progress < 1) requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+    counterObserver.unobserve(el);
+  });
+}, { threshold: 0.5 });
+document.querySelectorAll('.counter').forEach(el => counterObserver.observe(el));
+
+/* ── Demo terminal ── */
+const demoAnswers = [
+  {
+    text: 'The final project submission deadline is <strong>December 8, 2024 at 11:59 PM</strong>. Late submissions will not be accepted without prior written approval from the instructor.',
+    cite: 'CS401 Syllabus · Section 4.2 — Assignments & Deadlines'
+  },
+  {
+    text: 'The midterm exam is worth <strong>25% of your final grade</strong>. It is scheduled for Week 8 and covers all material from Modules 1–7.',
+    cite: 'CS401 Syllabus · Section 3.1 — Grade Breakdown'
+  },
+  {
+    text: 'Late submissions are accepted with a <strong>10% penalty per day</strong> for up to 3 days after the due date. After 72 hours, assignments will no longer be accepted.',
+    cite: 'CS401 Course Policies · Section 5 — Late Work Policy'
+  }
+];
+
+let selectedQ = -1;
+const qBtns = document.querySelectorAll('.demo-q-btn');
+const pipeSteps = document.querySelectorAll('#demoPipeline .demo-pipe-step');
+const demoAnswer = document.getElementById('demoAnswer');
+const demoText = document.getElementById('demoText');
+const demoCite = document.getElementById('demoCite');
+const demoRunBtn = document.getElementById('demoRunBtn');
+
+qBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    qBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedQ = parseInt(btn.dataset.idx);
+    demoRunBtn.disabled = false;
+    demoRunBtn.textContent = '⚡ Run CampusIQ Query';
+    demoAnswer.classList.remove('visible');
+    pipeSteps.forEach(s => { s.classList.remove('done', 'active'); });
+  });
+});
+
+demoRunBtn.addEventListener('click', async () => {
+  if (selectedQ < 0) return;
+  demoRunBtn.disabled = true;
+  demoAnswer.classList.remove('visible');
+  pipeSteps.forEach(s => s.classList.remove('done', 'active'));
+
+  for (let i = 0; i < pipeSteps.length; i++) {
+    pipeSteps[i].classList.add('active');
+    await delay(420);
+    pipeSteps[i].classList.remove('active');
+    pipeSteps[i].classList.add('done');
+  }
+
+  await delay(200);
+  demoText.innerHTML = demoAnswers[selectedQ].text;
+  demoCite.textContent = demoAnswers[selectedQ].cite;
+  demoAnswer.classList.add('visible');
+  demoRunBtn.disabled = false;
+  demoRunBtn.textContent = '⚡ Run Again';
+});
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
 </html>
